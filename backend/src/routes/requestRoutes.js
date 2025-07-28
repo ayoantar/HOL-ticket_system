@@ -1,47 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator');
 const requestController = require('../controllers/requestController');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../config/multer');
+const { 
+  createRequestLimiter, 
+  createFileLimiter,
+  validateRequest, 
+  validateEventRequest, 
+  handleValidationErrors,
+  validateFileUpload 
+} = require('../middleware/security');
 
 // Apply authentication middleware to all routes
 router.use(protect);
 
+// Apply rate limiting for request creation
+const requestLimiter = createRequestLimiter();
+const fileLimiter = createFileLimiter();
+
 // Create new request (any authenticated user)
 router.post('/', 
+  requestLimiter,
+  fileLimiter,
   upload.fields([
     { name: 'graphicFile', maxCount: 1 },
     { name: 'registrationFiles', maxCount: 5 }
   ]),
-  [
-    // Shared validations
-    body('requestType').isIn(['event', 'web', 'technical', 'graphic']).withMessage('Invalid request type'),
-    body('name').notEmpty().withMessage('Name is required'),
-    body('email').isEmail().withMessage('Valid email is required'),
-    body('phone').notEmpty().withMessage('Phone number is required'),
-    body('urgency').optional().isIn(['normal', 'urgent']).withMessage('Invalid urgency level'),
-    
-    // Event request validations
-    body('eventName').if(body('requestType').equals('event')).notEmpty().withMessage('Event name is required'),
-    body('ministryInCharge').if(body('requestType').equals('event')).notEmpty().withMessage('Ministry in charge is required'),
-    body('startingDate').if(body('requestType').equals('event')).isISO8601().withMessage('Valid starting date is required'),
-    body('endingDate').if(body('requestType').equals('event')).isISO8601().withMessage('Valid ending date is required'),
-    
-    // Web request validations
-    body('domain').if(body('requestType').equals('web')).isIn([
-      'housesoflight.org', 'housesoflight.church', 'hbrp.la', 'housesoflight.network',
-      'netzgomez.com', 'turningheartsacademy.com', 'pasionporjesus.la', 'blumacademy.com',
-      'centrodeasesoriafamiliar.org', 'casaderestauracion.la', 'raicesprofundas.la'
-    ]).withMessage('Invalid domain'),
-    body('description').if(body('requestType').equals('web')).notEmpty().withMessage('Description is required'),
-    
-    // Technical request validations
-    body('issueDescription').if(body('requestType').equals('technical')).notEmpty().withMessage('Issue description is required'),
-    
-    // Graphic request validations
-    body('eventName').if(body('requestType').equals('graphic')).notEmpty().withMessage('Event name is required')
-  ],
+  validateFileUpload,
+  validateRequest,
+  handleValidationErrors,
   requestController.createRequest
 );
 

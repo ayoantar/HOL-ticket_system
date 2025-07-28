@@ -375,12 +375,55 @@ The system now provides comprehensive visual feedback for request updates across
 - `GET/POST/PUT/DELETE /api/admin/users/*` - User management
 - `GET/POST /api/departments/routing` - Request routing configuration
 
-### Production Deployment (cPanel Guide Added July 24, 2025)
+### Production Deployment
+
+#### DigitalOcean Droplet Specifications (Added July 28, 2025)
+
+**Recommended Droplet Configuration for Production:**
+
+**Basic Setup (Development/Small Team):**
+- **Size**: Basic - $12/month
+- **CPU**: 1 vCPU
+- **Memory**: 2 GB RAM
+- **Storage**: 50 GB SSD
+- **Transfer**: 2 TB
+
+**Production Ready (Recommended):**
+- **Size**: Regular - $24/month  
+- **CPU**: 2 vCPUs
+- **Memory**: 4 GB RAM
+- **Storage**: 80 GB SSD
+- **Transfer**: 4 TB
+
+**Additional Settings:**
+- **OS**: Ubuntu 22.04 LTS
+- **Datacenter**: Choose closest to your users
+- **Authentication**: SSH keys (more secure than password)
+- **Monitoring**: Enable monitoring
+- **Backups**: Enable automatic backups (+20% cost)
+
+**Stack Requirements Analysis:**
+- **Node.js backend** (Express server): ~256-512MB RAM
+- **React frontend** (served as static files): Minimal overhead
+- **PostgreSQL database**: ~512MB-1GB RAM
+- **File uploads**: Up to 50MB per file, requires adequate storage
+- **OS + services**: ~512MB RAM
+- **Buffer for growth**: Remaining RAM for scaling
+
+**Deployment Process:**
+1. Install Node.js, PostgreSQL, and Nginx
+2. Clone `main` branch from repository
+3. Set up database and environment variables
+4. Configure Nginx as reverse proxy
+5. Set up SSL certificate (Let's Encrypt)
+6. Configure PM2 for process management
+
+#### cPanel Deployment Support (Added July 24, 2025)
 
 **cPanel Deployment Support**:
-The system now includes comprehensive deployment documentation for cPanel hosting environments.
+The system also includes comprehensive deployment documentation for cPanel hosting environments.
 
-**Key Deployment Features**:
+**Key cPanel Features**:
 - **Node.js Application Setup**: Complete guide for configuring Node.js apps in cPanel
 - **Database Configuration**: MySQL/PostgreSQL setup with proper credentials
 - **File Structure Organization**: Optimized layout for cPanel public_html directory
