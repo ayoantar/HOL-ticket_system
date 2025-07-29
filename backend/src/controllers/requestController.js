@@ -14,8 +14,16 @@ exports.createRequest = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       await transaction.rollback();
+      
+      // Create user-friendly validation error messages
+      const validationErrors = errors.array();
+      const userFriendlyErrors = validationErrors.map(err => {
+        const fieldName = err.path || err.param || 'field';
+        return `${fieldName}: ${err.msg}`;
+      });
+      
       const errorResponse = createErrorResponse(
-        'Request validation failed. Please check your input and try again.',
+        'Please fix the following errors:\n' + userFriendlyErrors.join('\n'),
         null,
         {
           validationErrors: errors.array(),
@@ -23,6 +31,9 @@ exports.createRequest = async (req, res) => {
           userId: req.user?.id
         }
       );
+      
+      // Add validation errors to response for frontend handling
+      errorResponse.validationErrors = validationErrors;
       return res.status(400).json(errorResponse);
     }
     

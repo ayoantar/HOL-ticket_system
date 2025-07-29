@@ -170,33 +170,124 @@ exports.validateRequest = [
   body('name')
     .trim()
     .isLength({ min: 2, max: 255 })
-    .withMessage('Name must be 2-255 characters'),
+    .withMessage('Name must be between 2-255 characters'),
   body('email')
     .isEmail()
     .normalizeEmail()
-    .withMessage('Please provide a valid email'),
+    .withMessage('Please provide a valid email address'),
   body('phone')
-    .optional()
-    .matches(/^[\+]?[1-9][\d]{0,15}$/)
-    .withMessage('Please provide a valid phone number'),
+    .notEmpty()
+    .withMessage('Phone number is required')
+    .matches(/^[\+]?[1-9][\d\s\-\(\)]{7,20}$/)
+    .withMessage('Please provide a valid phone number (7-20 digits)'),
   body('requestType')
     .isIn(['event', 'web', 'technical', 'graphic'])
-    .withMessage('Invalid request type'),
+    .withMessage('Please select a valid request type'),
 ];
 
-exports.validateEventRequest = [
-  body('event_name')
+// Validation for all request types combined
+exports.validateRequestFields = [
+  // Event request validation
+  body('eventName')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Event name is required')
     .trim()
     .isLength({ min: 2, max: 255 })
-    .withMessage('Event name must be 2-255 characters'),
-  body('starting_date')
+    .withMessage('Event name must be between 2-255 characters'),
+  body('ministryInCharge')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Ministry in charge is required')
+    .trim()
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Ministry in charge must be between 2-255 characters'),
+  body('startingDate')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Starting date is required')
     .isISO8601()
-    .toDate()
-    .withMessage('Please provide a valid start date'),
-  body('ending_date')
+    .withMessage('Please provide a valid starting date'),
+  body('endingDate')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Ending date is required')
     .isISO8601()
-    .toDate()
-    .withMessage('Please provide a valid end date'),
+    .withMessage('Please provide a valid ending date'),
+  
+  // Web request validation
+  body('domain')
+    .if(body('requestType').equals('web'))
+    .notEmpty()
+    .withMessage('Domain is required for web requests')
+    .trim()
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Domain must be between 2-255 characters'),
+  body('description')
+    .if(body('requestType').equals('web'))
+    .notEmpty()
+    .withMessage('Description is required for web requests')
+    .trim()
+    .isLength({ min: 10, max: 2000 })
+    .withMessage('Description must be between 10-2000 characters'),
+  
+  // Technical request validation
+  body('issueDescription')
+    .if(body('requestType').equals('technical'))
+    .notEmpty()
+    .withMessage('Issue description is required for technical requests')
+    .trim()
+    .isLength({ min: 10, max: 2000 })
+    .withMessage('Issue description must be between 10-2000 characters'),
+  
+  // Graphic request validation
+  body('eventName')
+    .if(body('requestType').equals('graphic'))
+    .notEmpty()
+    .withMessage('Event name is required for graphic requests')
+    .trim()
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Event name must be between 2-255 characters'),
+  
+  // Optional fields
+  body('cost')
+    .optional()
+    .isDecimal({ decimal_digits: '0,2' })
+    .withMessage('Cost must be a valid decimal number'),
+  body('urgency')
+    .optional()
+    .isIn(['normal', 'urgent'])
+    .withMessage('Urgency must be either normal or urgent'),
+];
+
+// Legacy - keeping for backward compatibility
+exports.validateEventRequest = [
+  body('eventName')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Event name is required')
+    .trim()
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Event name must be between 2-255 characters'),
+  body('ministryInCharge')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Ministry in charge is required')
+    .trim()
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Ministry in charge must be between 2-255 characters'),
+  body('startingDate')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Starting date is required')
+    .isISO8601()
+    .withMessage('Please provide a valid starting date'),
+  body('endingDate')
+    .if(body('requestType').equals('event'))
+    .notEmpty()
+    .withMessage('Ending date is required')
+    .isISO8601()
+    .withMessage('Please provide a valid ending date'),
   body('cost')
     .optional()
     .isDecimal({ decimal_digits: '0,2' })

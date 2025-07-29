@@ -99,25 +99,42 @@ const NewRequestForm = () => {
         
         let errorMessage = 'Failed to submit request';
         let errorId = null;
+        let showErrorId = true;
         
         if (error.response?.data?.errorId) {
           errorId = error.response.data.errorId;
         }
         
         if (error.response?.data?.validationErrors) {
-          // New validation errors format with error ID
+          // Validation errors - show user-friendly messages without error ID
           console.log('Validation errors:', error.response.data.validationErrors);
-          errorMessage = error.response.data.validationErrors.map(err => `${err.param}: ${err.msg}`).join(', ');
+          const validationErrors = error.response.data.validationErrors;
+          
+          // Use the user-friendly message from backend if available
+          if (error.response.data.message && error.response.data.message.startsWith('Please fix the following errors:')) {
+            errorMessage = error.response.data.message;
+            showErrorId = false; // Don't show error ID for validation errors
+          } else {
+            // Fallback to constructing error message from validation errors
+            errorMessage = 'Please fix the following errors:\n' + 
+              validationErrors.map(err => {
+                const fieldName = err.path || err.param || 'field';
+                return `• ${fieldName}: ${err.msg}`;
+              }).join('\n');
+            showErrorId = false;
+          }
         } else if (error.response?.data?.errors) {
           // Legacy validation errors format
           console.log('Legacy validation errors:', error.response.data.errors);
-          errorMessage = error.response.data.errors.map(err => `${err.param}: ${err.msg}`).join(', ');
+          errorMessage = 'Please fix the following errors:\n' + 
+            error.response.data.errors.map(err => `• ${err.param}: ${err.msg}`).join('\n');
+          showErrorId = false;
         } else if (error.response?.data?.message) {
           errorMessage = error.response.data.message;
         }
         
-        // Include error ID in the message if available
-        const fullErrorMessage = errorId 
+        // Only include error ID for non-validation errors
+        const fullErrorMessage = (errorId && showErrorId) 
           ? `${errorMessage}\n\nError ID: ${errorId} (Please provide this ID when contacting support)`
           : errorMessage;
         
@@ -481,7 +498,7 @@ const NewRequestForm = () => {
         </Typography>
         
         {alert && (
-          <Alert severity={alert.type} sx={{ mb: 3 }} onClose={() => setAlert(null)}>
+          <Alert severity={alert.type} sx={{ mb: 3, whiteSpace: 'pre-line' }} onClose={() => setAlert(null)}>
             {alert.message}
           </Alert>
         )}

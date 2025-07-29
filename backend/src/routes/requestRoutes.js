@@ -8,7 +8,7 @@ const {
   createRequestLimiter, 
   createFileLimiter,
   validateRequest, 
-  validateEventRequest, 
+  validateRequestFields, 
   handleValidationErrors,
   validateFileUpload 
 } = require('../middleware/security');
@@ -30,7 +30,7 @@ router.post('/',
   ]),
   validateFileUpload,
   validateRequest,
-  handleValidationErrors,
+  validateRequestFields,
   requestController.createRequest
 );
 
