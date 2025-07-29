@@ -1,0 +1,178 @@
+{
+  "common": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "yes": "Sí",
+    "no": "No",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior"
+  },
+  "navigation": {
+    "dashboard": "Tablero",
+    "newRequest": "Nueva Solicitud",
+    "adminPanel": "Panel de Administrador",
+    "logout": "Cerrar Sesión",
+    "housesOfLight": "Casas de Luz"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "name": "Nombre Completo",
+    "company": "Empresa",
+    "phone": "Número de Teléfono",
+    "loginButton": "Iniciar Sesión",
+    "registerButton": "Crear Cuenta",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "needAccount": "¿Necesitas una cuenta?",
+    "loginError": "Correo electrónico o contraseña inválidos",
+    "registerSuccess": "¡Cuenta creada exitosamente!"
+  },
+  "dashboard": {
+    "title": "Tablero",
+    "allRequests": "Todas las Solicitudes",
+    "myRequests": "Mis Solicitudes",
+    "departmentRequests": "Departamento",
+    "totalRequests": "Total de Solicitudes",
+    "pendingRequests": "Pendientes",
+    "inProgressRequests": "En Progreso",
+    "completedRequests": "Completadas",
+    "assignRequest": "Asignar Solicitud",
+    "viewDetails": "Ver Detalles",
+    "noRequests": "No se encontraron solicitudes",
+    "requestNumber": "Solicitud #",
+    "status": "Estado",
+    "assignedTo": "Asignado a",
+    "createdDate": "Creado",
+    "lastActivity": "Última Actividad"
+  },
+  "requests": {
+    "newRequest": "Enviar Nueva Solicitud",
+    "requestType": "Tipo de Solicitud",
+    "selectRequestType": "Seleccionar Tipo de Solicitud",
+    "userInformation": "Información del Usuario",
+    "requestDetails": "Detalles de la Solicitud",
+    "reviewSubmit": "Revisar y Enviar",
+    "submitting": "Enviando...",
+    "submitRequest": "Enviar Solicitud",
+    "requestSubmitted": "¡Solicitud enviada exitosamente!",
+    "types": {
+      "event": {
+        "title": "Nuevo Evento",
+        "description": "Solicitud para configuración de nuevo evento",
+        "eventName": "Nombre del Evento",
+        "ministryInCharge": "Ministerio a Cargo",
+        "startingDate": "Fecha y Hora de Inicio",
+        "endingDate": "Fecha y Hora de Final",
+        "graphicRequired": "¿Se requiere gráfico?",
+        "graphicConcept": "Descripción del Concepto Gráfico",
+        "uploadGraphic": "Subir Archivo de Concepto Gráfico",
+        "cost": "Costo",
+        "ticketsOnline": "¿Boletos en línea?",
+        "ticketsInPerson": "¿Boletos en persona?",
+        "registrationLinks": "Enlaces/Documentos después del Registro",
+        "uploadRegistration": "Subir Documentos de Registro",
+        "equipmentNeeded": "Equipo de Medios / Equipo Necesario",
+        "equipment": {
+          "cameras": "Cámaras",
+          "director": "Director",
+          "lyrics": "Letras",
+          "sound": "Sonido"
+        }
+      },
+      "web": {
+        "title": "Solicitud Web",
+        "description": "Actualizaciones o modificaciones del sitio web",
+        "domain": "Dominio",
+        "description": "Descripción"
+      },
+      "technical": {
+        "title": "Problema Técnico",
+        "description": "Reportar problemas técnicos",
+        "issueType": "Tipo de Problema",
+        "severity": "Severidad",
+        "issueDescription": "Descripción del Problema",
+        "stepsToReproduce": "Pasos para Reproducir",
+        "deviceInfo": "Información del Dispositivo",
+        "errorMessages": "Mensajes de Error",
+        "attemptedSolutions": "Soluciones Intentadas",
+        "attachments": "Archivos Adjuntos"
+      },
+      "graphic": {
+        "title": "Diseños Gráficos",
+        "description": "Solicitar trabajo de diseño gráfico",
+        "eventName": "Nombre del Evento",
+        "eventDate": "Fecha del Evento",
+        "specificFont": "Fuente Específica",
+        "colorPreference": "Preferencia de Color",
+        "isPreviousEvent": "Evento Anterior",
+        "reusableItems": "Elementos Reutilizables"
+      }
+    },
+    "urgency": {
+      "label": "Urgencia",
+      "normal": "Normal",
+      "urgent": "Urgente"
+    },
+    "dueDate": "Fecha de Vencimiento (Opcional)",
+    "status": {
+      "pending": "Pendiente",
+      "inProgress": "En Progreso",
+      "completed": "Completado",
+      "cancelled": "Cancelado",
+      "onHold": "En Espera"
+    }
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "email": "Por favor ingrese un correo electrónico válido",
+    "phone": "Por favor ingrese un número de teléfono válido",
+    "minLength": "Debe tener al menos {{count}} caracteres",
+    "maxLength": "No debe tener más de {{count}} caracteres",
+    "selectOption": "Por favor seleccione una opción",
+    "invalidDate": "Por favor seleccione una fecha válida",
+    "fileTooLarge": "El tamaño del archivo debe ser menor a {{size}}MB",
+    "invalidFileType": "Tipo de archivo inválido"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar Todo como Leído",
+    "noNotifications": "No hay notificaciones",
+    "requestAssigned": "Solicitud Asignada",
+    "statusChanged": "Estado Cambiado",
+    "newComment": "Nuevo Comentario"
+  },
+  "admin": {
+    "title": "Panel de Administrador",
+    "userManagement": "Gestión de Usuarios",
+    "systemSettings": "Configuraciones del Sistema",
+    "emailTemplates": "Plantillas de Correo",
+    "users": "Usuarios",
+    "departments": "Departamentos",
+    "settings": "Configuraciones"
+  },
+  "mobile": {
+    "menu": "Menú",
+    "search": "Buscar",
+    "filters": "Filtros",
+    "sort": "Ordenar",
+    "view": "Ver",
+    "actions": "Acciones"
+  },
+  "language": {
+    "switchLanguage": "Cambiar Idioma",
+    "english": "English",
+    "spanish": "Español"
+  }
+}

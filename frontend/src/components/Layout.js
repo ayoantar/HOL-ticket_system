@@ -15,7 +15,9 @@ import {
   Menu,
   MenuItem,
   Avatar,
-  Divider
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -27,14 +29,19 @@ import {
   ExitToApp,
   Assignment
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import NotificationPanel from './NotificationPanel';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useResponsive } from '../hooks/useResponsive';
 
 const drawerWidth = 240;
 
 const Layout = () => {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
+  const { t } = useTranslation();
+  const { isMobile } = useResponsive();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -57,19 +64,19 @@ const Layout = () => {
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'New Request', icon: <Assignment />, path: '/requests/new' },
+    { text: t('navigation.dashboard'), icon: <Dashboard />, path: '/dashboard' },
+    { text: t('navigation.newRequest'), icon: <Assignment />, path: '/requests/new' },
   ];
 
   if (isAdmin) {
-    menuItems.push({ text: 'Admin Panel', icon: <AdminPanelSettings />, path: '/admin' });
+    menuItems.push({ text: t('navigation.adminPanel'), icon: <AdminPanelSettings />, path: '/admin' });
   }
 
   const drawer = (
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap>
-          Houses of Light
+          {t('navigation.housesOfLight')}
         </Typography>
       </Toolbar>
       <Divider />
@@ -110,8 +117,11 @@ const Layout = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {user?.company || 'Event Management'}
+            {user?.company || t('navigation.housesOfLight')}
           </Typography>
+          
+          {/* Language Switcher */}
+          <LanguageSwitcher color="inherit" size={isMobile ? 'small' : 'medium'} />
           
           <IconButton color="inherit" onClick={() => setNotificationOpen(true)}>
             <Badge badgeContent={0} color="error">
@@ -143,7 +153,7 @@ const Layout = () => {
               <ListItemIcon>
                 <ExitToApp fontSize="small" />
               </ListItemIcon>
-              Logout
+              {t('navigation.logout')}
             </MenuItem>
           </Menu>
         </Toolbar>
@@ -181,9 +191,12 @@ const Layout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 1, sm: 2, md: 3 }, // Responsive padding
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: 8
+          mt: { xs: 7, sm: 8 }, // Smaller top margin on mobile
+          minHeight: 'calc(100vh - 64px)', // Ensure full height
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         <Outlet />

@@ -1,0 +1,178 @@
+{
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "newRequest": "New Request",
+    "adminPanel": "Admin Panel",
+    "logout": "Logout",
+    "housesOfLight": "Houses of Light"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "company": "Company",
+    "phone": "Phone Number",
+    "loginButton": "Sign In",
+    "registerButton": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "needAccount": "Need an account?",
+    "loginError": "Invalid email or password",
+    "registerSuccess": "Account created successfully!"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "allRequests": "All Requests",
+    "myRequests": "My Requests",
+    "departmentRequests": "Department",
+    "totalRequests": "Total Requests",
+    "pendingRequests": "Pending",
+    "inProgressRequests": "In Progress",
+    "completedRequests": "Completed",
+    "assignRequest": "Assign Request",
+    "viewDetails": "View Details",
+    "noRequests": "No requests found",
+    "requestNumber": "Request #",
+    "status": "Status",
+    "assignedTo": "Assigned To",
+    "createdDate": "Created",
+    "lastActivity": "Last Activity"
+  },
+  "requests": {
+    "newRequest": "Submit New Request",
+    "requestType": "Request Type",
+    "selectRequestType": "Select Request Type",
+    "userInformation": "User Information",
+    "requestDetails": "Request Details",
+    "reviewSubmit": "Review & Submit",
+    "submitting": "Submitting...",
+    "submitRequest": "Submit Request",
+    "requestSubmitted": "Request submitted successfully!",
+    "types": {
+      "event": {
+        "title": "New Event",
+        "description": "Request for a new event setup",
+        "eventName": "Event Name",
+        "ministryInCharge": "Ministry in Charge",
+        "startingDate": "Starting Date & Time",
+        "endingDate": "Ending Date & Time",
+        "graphicRequired": "Graphic required?",
+        "graphicConcept": "Graphic Concept Description",
+        "uploadGraphic": "Upload Graphic Concept File",
+        "cost": "Cost",
+        "ticketsOnline": "Tickets for online?",
+        "ticketsInPerson": "Tickets for in person?",
+        "registrationLinks": "Links/Documents after Registration",
+        "uploadRegistration": "Upload Registration Documents",
+        "equipmentNeeded": "Media Team / Equipment Needed",
+        "equipment": {
+          "cameras": "Cameras",
+          "director": "Director",
+          "lyrics": "Lyrics",
+          "sound": "Sound"
+        }
+      },
+      "web": {
+        "title": "Web Request",
+        "description": "Website updates or modifications",
+        "domain": "Domain",
+        "description": "Description"
+      },
+      "technical": {
+        "title": "Technical Issue",
+        "description": "Report technical problems",
+        "issueType": "Issue Type",
+        "severity": "Severity",
+        "issueDescription": "Issue Description",
+        "stepsToReproduce": "Steps to Reproduce",
+        "deviceInfo": "Device Information",
+        "errorMessages": "Error Messages",
+        "attemptedSolutions": "Attempted Solutions",
+        "attachments": "Attachments"
+      },
+      "graphic": {
+        "title": "Graphic Designs",
+        "description": "Request graphic design work",
+        "eventName": "Event Name",
+        "eventDate": "Event Date",
+        "specificFont": "Specific Font",
+        "colorPreference": "Color Preference",
+        "isPreviousEvent": "Previous Event",
+        "reusableItems": "Reusable Items"
+      }
+    },
+    "urgency": {
+      "label": "Urgency",
+      "normal": "Normal",
+      "urgent": "Urgent"
+    },
+    "dueDate": "Due Date (Optional)",
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "onHold": "On Hold"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email address",
+    "phone": "Please enter a valid phone number",
+    "minLength": "Must be at least {{count}} characters",
+    "maxLength": "Must be no more than {{count}} characters",
+    "selectOption": "Please select an option",
+    "invalidDate": "Please select a valid date",
+    "fileTooLarge": "File size must be less than {{size}}MB",
+    "invalidFileType": "Invalid file type"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark All Read",
+    "noNotifications": "No notifications",
+    "requestAssigned": "Request Assigned",
+    "statusChanged": "Status Changed",
+    "newComment": "New Comment"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "userManagement": "User Management",
+    "systemSettings": "System Settings",
+    "emailTemplates": "Email Templates",
+    "users": "Users",
+    "departments": "Departments",
+    "settings": "Settings"
+  },
+  "mobile": {
+    "menu": "Menu",
+    "search": "Search",
+    "filters": "Filters",
+    "sort": "Sort",
+    "view": "View",
+    "actions": "Actions"
+  },
+  "language": {
+    "switchLanguage": "Switch Language",
+    "english": "English",
+    "spanish": "Español"
+  }
+}

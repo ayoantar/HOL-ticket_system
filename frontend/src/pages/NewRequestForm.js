@@ -18,8 +18,10 @@ import {
 } from '@mui/material';
 import { useMutation } from 'react-query';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { useResponsive } from '../hooks/useResponsive';
 import EventRequestForm from '../components/forms/EventRequestForm';
 import WebRequestForm from '../components/forms/WebRequestForm';
 import TechnicalRequestForm from '../components/forms/TechnicalRequestForm';
@@ -27,6 +29,8 @@ import GraphicRequestForm from '../components/forms/GraphicRequestForm';
 
 const NewRequestForm = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const { isMobile, getContainerMaxWidth } = useResponsive();
   const [activeStep, setActiveStep] = useState(0);
   const [requestType, setRequestType] = useState('');
   const [userInfo, setUserInfo] = useState({
@@ -37,13 +41,18 @@ const NewRequestForm = () => {
   const [formData, setFormData] = useState({});
   const [alert, setAlert] = useState(null);
 
-  const steps = ['Select Request Type', 'User Information', 'Request Details', 'Review & Submit'];
+  const steps = [
+    t('requests.selectRequestType'), 
+    t('requests.userInformation'), 
+    t('requests.requestDetails'), 
+    t('requests.reviewSubmit')
+  ];
 
   const requestTypes = [
-    { value: 'event', label: 'New Event', description: 'Request for a new event setup' },
-    { value: 'web', label: 'Web Request', description: 'Website updates or modifications' },
-    { value: 'technical', label: 'Technical Issue', description: 'Report technical problems' },
-    { value: 'graphic', label: 'Graphic Designs', description: 'Request graphic design work' }
+    { value: 'event', label: t('requests.types.event.title'), description: t('requests.types.event.description') },
+    { value: 'web', label: t('requests.types.web.title'), description: t('requests.types.web.description') },
+    { value: 'technical', label: t('requests.types.technical.title'), description: t('requests.types.technical.description') },
+    { value: 'graphic', label: t('requests.types.graphic.title'), description: t('requests.types.graphic.description') }
   ];
 
   const createRequestMutation = useMutation(
@@ -491,10 +500,10 @@ const NewRequestForm = () => {
   };
 
   return (
-    <Container maxWidth="md">
-      <Paper sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Submit New Request
+    <Container maxWidth={getContainerMaxWidth()}>
+      <Paper sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+        <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+          {t('requests.newRequest')}
         </Typography>
         
         {alert && (
@@ -503,22 +512,44 @@ const NewRequestForm = () => {
           </Alert>
         )}
 
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        <Stepper 
+          activeStep={activeStep} 
+          sx={{ mb: { xs: 2, sm: 3, md: 4 } }}
+          orientation={isMobile ? "vertical" : "horizontal"}
+          alternativeLabel={!isMobile}
+          nonLinear={false}
+        >
           {steps.map((label) => (
             <Step key={label}>
-              <StepLabel>{label}</StepLabel>
+              <StepLabel 
+                sx={{
+                  '& .MuiStepLabel-labelContainer': {
+                    fontSize: isMobile ? '0.875rem' : '1rem'
+                  }
+                }}
+              >
+                {isMobile ? label.split(' ').slice(0, 2).join(' ') : label}
+              </StepLabel>
             </Step>
           ))}
         </Stepper>
 
         {renderStepContent()}
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          mt: { xs: 3, sm: 4 },
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? 2 : 0
+        }}>
           <Button
             onClick={handleBack}
             disabled={activeStep === 0}
+            size={isMobile ? 'large' : 'medium'}
+            fullWidth={isMobile}
           >
-            Back
+            {t('common.back')}
           </Button>
           
           {activeStep === steps.length - 1 ? (
@@ -526,15 +557,19 @@ const NewRequestForm = () => {
               variant="contained"
               onClick={handleSubmit}
               disabled={createRequestMutation.isLoading}
+              size={isMobile ? 'large' : 'medium'}
+              fullWidth={isMobile}
             >
-              {createRequestMutation.isLoading ? 'Submitting...' : 'Submit Request'}
+              {createRequestMutation.isLoading ? t('requests.submitting') : t('requests.submitRequest')}
             </Button>
           ) : (
             <Button
               variant="contained"
               onClick={handleNext}
+              size={isMobile ? 'large' : 'medium'}
+              fullWidth={isMobile}
             >
-              Next
+              {t('common.next')}
             </Button>
           )}
         </Box>
