@@ -69,7 +69,7 @@ const Layout = () => {
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap>
-          Event Ticketing
+          Houses of Light
         </Typography>
       </Toolbar>
       <Divider />

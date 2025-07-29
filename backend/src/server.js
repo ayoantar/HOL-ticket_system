@@ -52,7 +52,10 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.CLIENT_URL || 'http://localhost:3002',
-      'http://localhost:3000', // React dev server
+      'http://localhost:3000', // React dev server default
+      'http://localhost:3001', // Alternative React port
+      'http://localhost:3002', // Houses of Light frontend port
+      'http://localhost:5002', // Backend server (for proxy)
     ];
     
     // Allow requests with no origin (mobile apps, Postman, etc.)
@@ -61,6 +64,7 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log(`CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },

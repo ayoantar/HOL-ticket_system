@@ -2,7 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Last Updated:** July 24, 2025
+**Project:** Houses of Light Request Management System  
+**Last Updated:** July 28, 2025
 
 ## Development Commands
 

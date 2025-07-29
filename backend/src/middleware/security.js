@@ -255,19 +255,24 @@ exports.preventSQLInjection = (req, res, next) => {
 
 // CSRF protection for non-API routes
 exports.csrfProtection = (req, res, next) => {
-  // Skip CSRF for API routes with proper authentication
-  if (req.path.startsWith('/api/') && req.headers.authorization) {
+  // Skip CSRF for API routes (includes auth endpoints like login)
+  if (req.path.startsWith('/api/')) {
     return next();
   }
   
   // For other routes, ensure they have proper headers
   const allowedOrigins = [
     process.env.CLIENT_URL || 'http://localhost:3002',
-    'http://localhost:3000', // React dev server
+    'http://localhost:3000', // React dev server default
+    'http://localhost:3001', // Alternative React port
+    'http://localhost:3002', // Houses of Light frontend port
+    'http://localhost:5002', // Backend server (for proxy)
   ];
   
   const origin = req.headers.origin || req.headers.referer;
   if (origin && !allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+    console.log(`Security middleware blocked origin: ${origin}`);
+    console.log(`Allowed origins:`, allowedOrigins);
     return res.status(403).json({
       success: false,
       message: 'Forbidden: Invalid origin'

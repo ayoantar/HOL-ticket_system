@@ -2,6 +2,8 @@ const User = require('./User');
 const Equipment = require('./Equipment');
 const Notification = require('./Notification');
 const Department = require('./Department');
+const SystemSettings = require('./SystemSettings');
+const EmailTemplate = require('./EmailTemplate');
 // Request system models
 const Request = require('./Request');
 const EventRequest = require('./EventRequest');
@@ -55,6 +57,8 @@ module.exports = {
   Equipment,
   Notification,
   Department,
+  SystemSettings,
+  EmailTemplate,
   Request,
   EventRequest,
   WebRequest,

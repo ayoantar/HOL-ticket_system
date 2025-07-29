@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { body } = require('express-validator');
 const requestController = require('../controllers/requestController');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../config/multer');

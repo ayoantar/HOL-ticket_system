@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import {
   Container,
@@ -52,7 +52,18 @@ import {
   Business,
   Group,
   Settings,
-  Analytics
+  Analytics,
+  GetApp,
+  PictureAsPdf,
+  TableChart,
+  Refresh,
+  Email,
+  Computer,
+  Notifications,
+  Save,
+  Send,
+  Security,
+  Build
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -60,6 +71,8 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../config/api';
+import SystemSettingsForm from '../components/SystemSettingsForm';
+import EmailTemplateEditor from '../components/EmailTemplateEditor';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -87,6 +100,15 @@ const AdminDashboard = () => {
   });
   const [newPassword, setNewPassword] = useState('');
 
+  // State for analytics
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState('30');
+  const [selectedReportType, setSelectedReportType] = useState('performance');
+  const [reportFilters, setReportFilters] = useState({
+    startDate: '',
+    endDate: '',
+    department: ''
+  });
+
   // State for department management
   const [createDepartmentDialog, setCreateDepartmentDialog] = useState(false);
   const [editDepartmentDialog, setEditDepartmentDialog] = useState(false);
@@ -96,6 +118,72 @@ const AdminDashboard = () => {
     description: '',
     leadId: ''
   });
+
+  // State for system settings
+  const [systemSettings, setSystemSettings] = useState({
+    emailSettings: {
+      smtpHost: '',
+      smtpPort: 587,
+      smtpUser: '',
+      smtpPassword: '***',
+      fromName: 'Houses of Light',
+      fromEmail: '',
+      notificationsEnabled: true,
+      testEmailRecipient: ''
+    },
+    systemDefaults: {
+      defaultUrgency: 'normal',
+      autoAssignEnabled: false,
+      requestNumberPrefix: 'REQ',
+      defaultRequestStatus: 'pending',
+      enableFileUploads: true,
+      maxFileSize: 50,
+      sessionTimeout: 24,
+      passwordMinLength: 8
+    },
+    organizationSettings: {
+      organizationName: 'Houses of Light',
+      supportEmail: '',
+      websiteUrl: '',
+      address: '',
+      phone: '',
+      timeZone: 'America/New_York',
+      logoUrl: ''
+    },
+    notificationSettings: {
+      emailNotifications: true,
+      smsNotifications: false,
+      pushNotifications: true,
+      notifyOnAssignment: true,
+      notifyOnStatusChange: true,
+      notifyOnComment: true,
+      dailyDigest: false,
+      weeklyReport: false
+    },
+    securitySettings: {
+      enableTwoFactor: false,
+      loginAttemptLimit: 5,
+      sessionTimeout: 24,
+      requirePasswordChange: false,
+      passwordExpirationDays: 90,
+      enableAuditLog: true,
+      allowMultipleSessions: true
+    },
+    maintenanceSettings: {
+      maintenanceMode: false,
+      backupEnabled: true,
+      backupFrequency: 'daily',
+      autoCleanupDays: 30,
+      enableSystemAlerts: true,
+      debugMode: false
+    }
+  });
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+
+  // System settings now handled by SystemSettingsForm component
+
+  // System settings loading handled by SystemSettingsForm component
 
   // Redirect if not admin
   if (user?.role !== 'admin') {
@@ -136,6 +224,58 @@ const AdminDashboard = () => {
     async () => {
       const response = await axios.get(`${API_BASE_URL}/departments`);
       return response.data.departments;
+    }
+  );
+
+  // Queries for analytics and reports
+  const { data: analyticsData, isLoading: analyticsLoading } = useQuery(
+    ['admin-analytics', analyticsTimeframe],
+    async () => {
+      const response = await axios.get(`${API_BASE_URL}/admin/analytics?timeframe=${analyticsTimeframe}`);
+      return response.data.analytics;
+    },
+    { enabled: activeTab === 2 }
+  );
+
+  const { data: systemMetrics, isLoading: metricsLoading } = useQuery(
+    'admin-system-metrics',
+    async () => {
+      const response = await axios.get(`${API_BASE_URL}/admin/metrics`);
+      return response.data.metrics;
+    },
+    { enabled: activeTab === 2 }
+  );
+
+  const { data: detailedReport, isLoading: reportLoading } = useQuery(
+    ['admin-detailed-report', selectedReportType, reportFilters],
+    async () => {
+      const params = new URLSearchParams({
+        reportType: selectedReportType,
+        ...reportFilters
+      });
+      const response = await axios.get(`${API_BASE_URL}/admin/reports?${params}`);
+      return response.data;
+    },
+    { 
+      enabled: activeTab === 2 && selectedReportType && Object.values(reportFilters).some(v => v),
+      staleTime: 5 * 60 * 1000 // Cache for 5 minutes
+    }
+  );
+
+  // Query for system settings
+  const { data: settingsData, isLoading: settingsDataLoading } = useQuery(
+    'admin-system-settings',
+    async () => {
+      const response = await axios.get(`${API_BASE_URL}/admin/settings`);
+      return response.data;
+    },
+    { 
+      enabled: activeTab === 3,
+      onSuccess: (data) => {
+        if (data.success && data.settings) {
+          setSystemSettings(data.settings);
+        }
+      }
     }
   );
   
@@ -322,6 +462,156 @@ const AdminDashboard = () => {
     });
   };
 
+  // Export handlers for analytics
+  const handleExportCSV = async (reportType) => {
+    try {
+      const params = new URLSearchParams({
+        timeframe: analyticsTimeframe,
+        reportType: reportType || 'analytics'
+      });
+      
+      const response = await axios.get(`${API_BASE_URL}/admin/export/csv?${params}`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${reportType}-report-${analyticsTimeframe}days-${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('CSV report downloaded successfully!');
+    } catch (error) {
+      console.error('Export CSV error:', error);
+      toast.error('Failed to export CSV report');
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const params = new URLSearchParams({
+        timeframe: analyticsTimeframe
+      });
+      
+      const response = await axios.get(`${API_BASE_URL}/admin/export/pdf?${params}`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `analytics-report-${analyticsTimeframe}days-${Date.now()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('PDF report downloaded successfully!');
+    } catch (error) {
+      console.error('Export PDF error:', error);
+      toast.error('Failed to export PDF report');
+    }
+  };
+
+  const handleRefreshData = async () => {
+    try {
+      await axios.post(`${API_BASE_URL}/admin/analytics/refresh`);
+      
+      // Invalidate and refetch analytics queries
+      queryClient.invalidateQueries(['admin-analytics']);
+      queryClient.invalidateQueries(['admin-system-metrics']);
+      queryClient.invalidateQueries(['admin-detailed-report']);
+      
+      toast.success('Analytics data refreshed successfully!');
+    } catch (error) {
+      console.error('Refresh data error:', error);
+      toast.error('Failed to refresh analytics data');
+    }
+  };
+
+  // System settings handlers
+  const handleSettingsChange = useCallback((category, field, value) => {
+    console.log(`🔧 handleSettingsChange called: ${field} = ${value}`);
+    setSystemSettings(prev => ({
+      ...prev,
+      [category]: {
+        ...(prev[category] || {}),
+        [field]: value
+      }
+    }));
+  }, []);
+
+  // Isolated SMTP input component to prevent re-renders
+  const SMTPInput = useCallback(({ label, field, value, type = "text" }) => {
+    console.log(`📝 Rendering ${field} input with value:`, value);
+    return (
+      <TextField
+        key={`smtp-${field}`}
+        fullWidth
+        label={label}
+        type={type}
+        value={value || ''}
+        onChange={(e) => {
+          console.log(`⌨️ ${field} changed to:`, e.target.value);
+          handleSettingsChange('emailSettings', field, e.target.value);
+        }}
+        onFocus={() => console.log(`🎯 ${field} focused`)}
+        onBlur={() => console.log(`😴 ${field} blurred`)}
+        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+      />
+    );
+  }, [handleSettingsChange]);
+
+  const handleSaveSettings = useCallback(async () => {
+    try {
+      setSettingsSaving(true);
+      
+      const response = await axios.put(`${API_BASE_URL}/admin/settings`, systemSettings);
+      
+      if (response.data.success) {
+        toast.success('System settings updated successfully!');
+        queryClient.invalidateQueries(['admin-system-settings']);
+      }
+    } catch (error) {
+      console.error('Save settings error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update system settings');
+    } finally {
+      setSettingsSaving(false);
+    }
+  }, [systemSettings]);
+
+  const handleTestEmail = useCallback(async () => {
+    try {
+      const recipient = systemSettings.emailSettings.testEmailRecipient;
+      
+      if (!recipient) {
+        toast.error('Please enter a test email recipient first');
+        return;
+      }
+
+      toast.info('Sending test email...');
+      
+      const response = await axios.post(`${API_BASE_URL}/admin/settings/test-email`, {
+        recipient: recipient
+      });
+
+      if (response.data.success) {
+        toast.success(`Test email sent successfully to ${recipient}`);
+      } else {
+        toast.error(response.data.message || 'Failed to send test email');
+      }
+    } catch (error) {
+      console.error('Test email error:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to send test email. Please check your SMTP configuration.';
+      toast.error(errorMessage);
+    }
+  }, [systemSettings.emailSettings.testEmailRecipient]);
+
   // Status color function removed - no longer needed in admin panel
 
   const TabPanel = ({ children, value, index }) => {
@@ -379,6 +669,11 @@ const AdminDashboard = () => {
           <Tab 
             icon={<Settings />} 
             label="System Settings" 
+            sx={{ textTransform: 'none', fontWeight: 600 }}
+          />
+          <Tab 
+            icon={<Email />} 
+            label="Email Templates" 
             sx={{ textTransform: 'none', fontWeight: 600 }}
           />
         </Tabs>
@@ -899,48 +1194,380 @@ const AdminDashboard = () => {
       
       {/* Analytics & Reports Tab */}
       <TabPanel value={activeTab} index={2}>
-        <Typography variant="h5" gutterBottom>
-          Analytics & Reports
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          View comprehensive analytics, generate reports, and track system performance.
-        </Typography>
-        
-        {/* Coming Soon Card */}
-        <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, textAlign: 'center', py: 6 }}>
-          <CardContent>
-            <Analytics sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              Analytics & Reports Coming Soon
-            </Typography>
-            <Typography variant="body2" color="text.disabled">
-              This feature will provide detailed analytics on requests, user activity, and system performance.
-            </Typography>
-          </CardContent>
-        </Card>
+        <Box mb={4}>
+          <Typography variant="h5" gutterBottom>
+            Analytics & Reports
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            View comprehensive analytics, generate reports, and track system performance.
+          </Typography>
+          
+          {/* Timeframe Filter */}
+          <Card elevation={0} sx={{ mb: 3, borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+            <CardContent>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Avatar sx={{ backgroundColor: alpha(theme.palette.info.main, 0.1), color: theme.palette.info.main }}>
+                  <FilterList />
+                </Avatar>
+                <TextField
+                  select
+                  size="small"
+                  label="Timeframe"
+                  value={analyticsTimeframe}
+                  onChange={(e) => setAnalyticsTimeframe(e.target.value)}
+                  sx={{ minWidth: 150, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                >
+                  <MenuItem value="7">Last 7 days</MenuItem>
+                  <MenuItem value="30">Last 30 days</MenuItem>
+                  <MenuItem value="90">Last 3 months</MenuItem>
+                  <MenuItem value="365">Last year</MenuItem>
+                </TextField>
+              </Stack>
+            </CardContent>
+          </Card>
+          
+          {/* Export and Refresh Options */}
+          <Card elevation={0} sx={{ mb: 3, borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+            <CardContent>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Avatar sx={{ backgroundColor: alpha(theme.palette.success.main, 0.1), color: theme.palette.success.main }}>
+                    <GetApp />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      Export Reports
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Download analytics data in various formats
+                    </Typography>
+                  </Box>
+                </Box>
+                <Stack direction="row" spacing={2} flexWrap="wrap">
+                  <Button
+                    variant="outlined"
+                    startIcon={<TableChart />}
+                    onClick={() => handleExportCSV('analytics')}
+                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Analytics CSV
+                  </Button>
+                  <Button
+                    variant="outlined" 
+                    startIcon={<TableChart />}
+                    onClick={() => handleExportCSV('performance')}
+                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Performance CSV
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<TableChart />}
+                    onClick={() => handleExportCSV('activity')}
+                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Activity CSV
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PictureAsPdf />}
+                    onClick={handleExportPDF}
+                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Export PDF
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Refresh />}
+                    onClick={handleRefreshData}
+                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Refresh Data
+                  </Button>
+                </Stack>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Box>
+
+        {analyticsLoading || metricsLoading ? (
+          <Grid container spacing={3}>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <CardContent>
+                    <Skeleton height={120} />
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <>
+            {/* Overview Statistics */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <CardContent>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Avatar sx={{ backgroundColor: theme.palette.primary.main }}>
+                        <Analytics />
+                      </Avatar>
+                      <Box>
+                        <Typography color="textSecondary" gutterBottom>
+                          Total Requests
+                        </Typography>
+                        <Typography variant="h4" fontWeight={700}>
+                          {analyticsData?.overview?.total_requests || 0}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <CardContent>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Avatar sx={{ backgroundColor: theme.palette.success.main }}>
+                        <Add />
+                      </Avatar>
+                      <Box>
+                        <Typography color="textSecondary" gutterBottom>
+                          Recent Requests ({analyticsTimeframe}d)
+                        </Typography>
+                        <Typography variant="h4" color="success.main" fontWeight={700}>
+                          {analyticsData?.overview?.recent_requests || 0}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <CardContent>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Avatar sx={{ backgroundColor: theme.palette.warning.main }}>
+                        <People />
+                      </Avatar>
+                      <Box>
+                        <Typography color="textSecondary" gutterBottom>
+                          Active Users (30d)
+                        </Typography>
+                        <Typography variant="h4" color="warning.main" fontWeight={700}>
+                          {systemMetrics?.user_activity?.active_users || 0}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <CardContent>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Avatar sx={{ backgroundColor: theme.palette.info.main }}>
+                        <Settings />
+                      </Avatar>
+                      <Box>
+                        <Typography color="textSecondary" gutterBottom>
+                          Avg. Completion Time
+                        </Typography>
+                        <Typography variant="h4" color="info.main" fontWeight={700}>
+                          {analyticsData?.overview?.avg_completion_time || 0}d
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Status and Type Breakdown */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} md={6}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                    <Typography variant="h6" fontWeight={600}>
+                      Request Status Breakdown
+                    </Typography>
+                  </Box>
+                  <CardContent>
+                    {analyticsData?.status_breakdown?.map((status, index) => (
+                      <Box key={status.status} sx={{ mb: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                          <Chip
+                            label={status.status.charAt(0).toUpperCase() + status.status.slice(1)}
+                            size="small"
+                            color={status.status === 'completed' ? 'success' : status.status === 'in_progress' ? 'primary' : 'default'}
+                            sx={{ borderRadius: '8px', fontWeight: 500 }}
+                          />
+                          <Typography variant="body2" fontWeight={600}>
+                            {status.count}
+                          </Typography>
+                        </Stack>
+                        <Box sx={{ width: '100%', height: 8, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '4px' }}>
+                          <Box
+                            sx={{
+                              width: `${(status.count / (analyticsData?.overview?.total_requests || 1)) * 100}%`,
+                              height: '100%',
+                              backgroundColor: status.status === 'completed' ? theme.palette.success.main : 
+                                              status.status === 'in_progress' ? theme.palette.primary.main : 
+                                              theme.palette.grey[400],
+                              borderRadius: '4px'
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                    <Typography variant="h6" fontWeight={600}>
+                      Request Type Distribution
+                    </Typography>
+                  </Box>
+                  <CardContent>
+                    {analyticsData?.type_breakdown?.map((type, index) => (
+                      <Box key={type.request_type} sx={{ mb: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                          <Chip
+                            label={type.request_type.charAt(0).toUpperCase() + type.request_type.slice(1)}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            sx={{ borderRadius: '8px', fontWeight: 500 }}
+                          />
+                          <Typography variant="body2" fontWeight={600}>
+                            {type.count}
+                          </Typography>
+                        </Stack>
+                        <Box sx={{ width: '100%', height: 8, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '4px' }}>
+                          <Box
+                            sx={{
+                              width: `${(type.count / (analyticsData?.overview?.total_requests || 1)) * 100}%`,
+                              height: '100%',
+                              backgroundColor: theme.palette.primary.main,
+                              borderRadius: '4px'
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Top Performers and Department Stats */}
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                    <Typography variant="h6" fontWeight={600}>
+                      Top Performers
+                    </Typography>
+                  </Box>
+                  <CardContent>
+                    {analyticsData?.top_performers?.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                        No completed requests yet
+                      </Typography>
+                    ) : (
+                      analyticsData?.top_performers?.map((performer, index) => (
+                        <Box key={performer.assigned_to} sx={{ mb: 2 }}>
+                          <Stack direction="row" alignItems="center" spacing={2}>
+                            <Avatar sx={{ width: 32, height: 32, fontSize: '0.875rem' }}>
+                              {performer.assignedUser?.name?.charAt(0) || '?'}
+                            </Avatar>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2" fontWeight={600}>
+                                {performer.assignedUser?.name || 'Unknown'}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {performer.assignedUser?.department || 'No department'}
+                              </Typography>
+                            </Box>
+                            <Chip
+                              label={`${performer.dataValues?.completed_count || 0} completed`}
+                              size="small"
+                              color="success"
+                              sx={{ borderRadius: '8px', fontWeight: 500 }}
+                            />
+                          </Stack>
+                        </Box>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                    <Typography variant="h6" fontWeight={600}>
+                      Department Workload
+                    </Typography>
+                  </Box>
+                  <CardContent>
+                    {analyticsData?.department_breakdown?.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                        No department assignments yet
+                      </Typography>
+                    ) : (
+                      analyticsData?.department_breakdown?.map((dept, index) => (
+                        <Box key={dept.department} sx={{ mb: 2 }}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                            <Typography variant="body2" fontWeight={600}>
+                              {dept.department || 'Unassigned'}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {dept.count} requests
+                            </Typography>
+                          </Stack>
+                          <Box sx={{ width: '100%', height: 6, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '3px' }}>
+                            <Box
+                              sx={{
+                                width: `${(dept.count / Math.max(...(analyticsData?.department_breakdown?.map(d => d.count) || [1]))) * 100}%`,
+                                height: '100%',
+                                backgroundColor: theme.palette.secondary.main,
+                                borderRadius: '3px'
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </>
+        )}
       </TabPanel>
       
       {/* System Settings Tab */}
       <TabPanel value={activeTab} index={3}>
-        <Typography variant="h5" gutterBottom>
-          System Settings
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Configure system-wide settings, email templates, and application preferences.
-        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            System Settings
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            Configure system-wide settings, email templates, and application preferences for Houses of Light.
+          </Typography>
+        </Box>
         
-        {/* Coming Soon Card */}
-        <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, textAlign: 'center', py: 6 }}>
-          <CardContent>
-            <Settings sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              System Settings Coming Soon
-            </Typography>
-            <Typography variant="body2" color="text.disabled">
-              This feature will allow you to configure email settings, notification preferences, and system defaults.
-            </Typography>
-          </CardContent>
-        </Card>
+        <SystemSettingsForm />
+      </TabPanel>
+
+      {/* Email Templates Tab */}
+      <TabPanel value={activeTab} index={4}>
+        <EmailTemplateEditor />
       </TabPanel>
 
       {/* Update Status Dialog removed - no longer needed in admin panel */}
@@ -964,7 +1591,7 @@ const AdminDashboard = () => {
                 fullWidth
                 label="Full Name"
                 value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
               />
             </Grid>

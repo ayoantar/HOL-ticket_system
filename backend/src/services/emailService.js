@@ -1,19 +1,77 @@
 const nodemailer = require('nodemailer');
+const { EmailTemplate } = require('../models');
+let SystemSettings;
+try {
+  SystemSettings = require('../models/SystemSettings');
+} catch (err) {
+  console.log('SystemSettings model not available:', err.message);
+}
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+// Create transporter using system settings
+const createTransporter = async () => {
+  if (!SystemSettings) {
+    // Fallback to environment variables if SystemSettings not available
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
   }
-});
+
+  try {
+    const emailSettings = await SystemSettings.getByCategory('email');
+    
+    return nodemailer.createTransport({
+      host: emailSettings.smtpHost,
+      port: parseInt(emailSettings.smtpPort),
+      secure: parseInt(emailSettings.smtpPort) === 465,
+      auth: emailSettings.smtpUser && emailSettings.smtpPassword ? {
+        user: emailSettings.smtpUser,
+        pass: emailSettings.smtpPassword
+      } : null,
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+  } catch (error) {
+    console.error('Error creating transporter from system settings:', error);
+    // Fallback to environment variables
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+  }
+};
 
 exports.sendEmail = async (options) => {
   try {
+    const transporter = await createTransporter();
+    
+    // Get sender info from system settings or fallback to env
+    let fromName = 'Request Management System';
+    let fromEmail = process.env.EMAIL_USER;
+    
+    if (SystemSettings) {
+      try {
+        const emailSettings = await SystemSettings.getByCategory('email');
+        fromName = emailSettings.fromName || fromName;
+        fromEmail = emailSettings.fromEmail || fromEmail;
+      } catch (error) {
+        console.log('Using fallback sender info');
+      }
+    }
+    
     const mailOptions = {
-      from: `Request Management System <${process.env.EMAIL_USER}>`,
+      from: `${fromName} <${fromEmail}>`,
       to: options.to,
       subject: options.subject,
       html: options.html
@@ -28,62 +86,60 @@ exports.sendEmail = async (options) => {
   }
 };
 
-exports.sendRequestNotification = async (user, request, type) => {
-  const templates = {
-    created: {
-      subject: `Request Created: ${request.requestNumber}`,
-      html: `
-        <h2>Request Created Successfully</h2>
-        <p>Dear ${user.name},</p>
-        <p>Your request has been created with the following details:</p>
-        <ul>
-          <li>Request Number: ${request.requestNumber}</li>
-          <li>Type: ${request.requestType}</li>
-          <li>Status: ${request.status}</li>
-          <li>Urgency: ${request.urgency}</li>
-        </ul>
-        <p>You can track your request status by logging into your account.</p>
-      `
-    },
-    status_change: {
-      subject: `Request Status Updated: ${request.requestNumber}`,
-      html: `
-        <h2>Request Status Updated</h2>
-        <p>Dear ${user.name},</p>
-        <p>Your request ${request.requestNumber} status has been updated to: <strong>${request.status}</strong></p>
-        <p>Type: ${request.requestType}</p>
-        <p>Please log in to view more details.</p>
-      `
-    },
-    assigned: {
-      subject: `Request Assigned: ${request.requestNumber}`,
-      html: `
-        <h2>Request Assigned</h2>
-        <p>Dear ${user.name},</p>
-        <p>Your request ${request.requestNumber} has been assigned to our team.</p>
-        <p>Type: ${request.requestType}</p>
-        <p>Department: ${request.department}</p>
-        <p>Please log in to view more details.</p>
-      `
-    },
-    comment_added: {
-      subject: `New Comment on Request: ${request.requestNumber}`,
-      html: `
-        <h2>New Comment Added</h2>
-        <p>Dear ${user.name},</p>
-        <p>A new comment has been added to your request ${request.requestNumber}.</p>
-        <p>Type: ${request.requestType}</p>
-        <p>Please log in to view the comment and respond if needed.</p>
-      `
+exports.sendRequestNotification = async (user, request, type, additionalData = {}) => {
+  try {
+    // Map notification types to template keys
+    const templateKeyMap = {
+      'created': 'request_created',
+      'status_change': 'status_change', 
+      'assigned': 'request_assigned',
+      'comment_added': 'comment_added'
+    };
+    
+    const templateKey = templateKeyMap[type];
+    if (!templateKey) {
+      console.error(`Unknown notification type: ${type}`);
+      return false;
     }
-  };
-  
-  const template = templates[type];
-  if (template) {
-    await this.sendEmail({
-      to: user.email,
-      subject: template.subject,
-      html: template.html
+
+    // Get template from database
+    const template = await EmailTemplate.findOne({
+      where: {
+        templateKey: templateKey,
+        isActive: true
+      }
     });
+
+    if (!template) {
+      console.error(`Email template '${templateKey}' not found or inactive`);
+      return false;
+    }
+
+    // Prepare template variables
+    const variables = {
+      userName: user.name,
+      requestNumber: request.requestNumber,
+      requestType: request.requestType,
+      status: request.status,
+      urgency: request.urgency,
+      department: request.department,
+      assignedTo: additionalData.assignedTo || '',
+      commentBy: additionalData.commentBy || '',
+      ...additionalData
+    };
+
+    // Render template
+    const rendered = template.render(variables);
+
+    // Send email
+    return await this.sendEmail({
+      to: user.email,
+      subject: rendered.subject,
+      html: rendered.html
+    });
+
+  } catch (error) {
+    console.error('Error sending request notification:', error);
+    return false;
   }
 };
