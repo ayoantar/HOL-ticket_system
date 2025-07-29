@@ -17,8 +17,10 @@ import {
   Visibility as ViewIcon,
   Assignment as AssignIcon
 } from '@mui/icons-material';
+import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../hooks/useResponsive';
+import '../styles/MobileComponents.css';
 
 const MobileRequestCard = ({ 
   request, 
@@ -42,7 +44,17 @@ const MobileRequestCard = ({
   };
   
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString();
+    if (!date) return 'No date';
+    try {
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        return 'Invalid date';
+      }
+      return format(dateObj, 'MMM dd, yyyy');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
   
   const getRequestTypeColor = (type) => {
@@ -95,7 +107,7 @@ const MobileRequestCard = ({
             <strong>{t('dashboard.assignedTo')}:</strong> {request.assignedUser?.name || t('dashboard.noRequests')}
           </Typography>
           <Typography variant="body2">
-            <strong>{t('dashboard.createdDate')}:</strong> {formatDate(request.createdAt)}
+            <strong>{t('dashboard.createdDate')}:</strong> {formatDate(request.created_at)}
           </Typography>
         </Stack>
 

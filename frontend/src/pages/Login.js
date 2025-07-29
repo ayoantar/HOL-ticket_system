@@ -11,6 +11,7 @@ import {
   Link as MuiLink
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
+import '../styles/Auth.css';
 
 const Login = () => {
   const navigate = useNavigate();

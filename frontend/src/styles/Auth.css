@@ -1,0 +1,444 @@
+/* Authentication Components Styles (Login & Register) */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+@media (max-width: 600px) {
+  .auth-container {
+    padding: 16px;
+  }
+}
+
+.auth-paper {
+  max-width: 480px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-paper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 600px) {
+  .auth-paper {
+    max-width: none;
+    margin: 0;
+    border-radius: 20px;
+  }
+}
+
+.auth-content {
+  padding: 48px 40px;
+}
+
+@media (max-width: 600px) {
+  .auth-content {
+    padding: 32px 24px;
+  }
+}
+
+/* Header Section */
+.auth-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 600px) {
+  .auth-header {
+    margin-bottom: 32px;
+  }
+}
+
+.auth-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+@media (max-width: 600px) {
+  .auth-logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+}
+
+.auth-logo-icon {
+  color: white;
+  font-size: 40px;
+}
+
+@media (max-width: 600px) {
+  .auth-logo-icon {
+    font-size: 32px;
+  }
+}
+
+.auth-title {
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (max-width: 600px) {
+  .auth-title {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 960px) {
+  .auth-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 960px) {
+  .auth-title {
+    font-size: 3rem;
+  }
+}
+
+.auth-subtitle {
+  color: #666;
+  font-weight: 400;
+}
+
+@media (max-width: 600px) {
+  .auth-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+/* Form Styles */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .auth-form {
+    gap: 20px;
+  }
+}
+
+.auth-form-field {
+  width: 100%;
+}
+
+.auth-form-field .MuiOutlinedInput-root {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.auth-form-field .MuiOutlinedInput-root:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.auth-form-field .MuiOutlinedInput-root.Mui-focused {
+  background: white;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.auth-form-field .MuiInputLabel-root {
+  font-weight: 500;
+  color: #666;
+}
+
+.auth-form-field .MuiInputLabel-root.Mui-focused {
+  color: #667eea;
+}
+
+/* Submit Button */
+.auth-submit-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+  text-transform: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 1rem;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 8px;
+}
+
+.auth-submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8, #6b42a3);
+}
+
+.auth-submit-button:active {
+  transform: translateY(0);
+}
+
+.auth-submit-button.Mui-disabled {
+  background: #ccc;
+  color: #999;
+  box-shadow: none;
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .auth-submit-button {
+    padding: 18px 24px;
+    font-size: 1rem;
+  }
+}
+
+/* Loading State */
+.auth-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-loading .MuiCircularProgress-root {
+  width: 20px !important;
+  height: 20px !important;
+  color: white;
+}
+
+/* Footer Links */
+.auth-footer {
+  margin-top: 32px;
+  text-align: center;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 600px) {
+  .auth-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+}
+
+.auth-footer-text {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .auth-footer-text {
+    font-size: 0.875rem;
+  }
+}
+
+.auth-footer-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.auth-footer-link:hover {
+  color: #5a6fd8;
+  text-decoration: underline;
+}
+
+/* Error Messages */
+.auth-error {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  color: #d32f2f;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 24px;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (max-width: 600px) {
+  .auth-error {
+    padding: 12px;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+  }
+}
+
+/* Success Messages */
+.auth-success {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  color: #2e7d32;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 24px;
+  animation: slideIn 0.5s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Password Field Eye Icon */
+.auth-password-toggle {
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.auth-password-toggle:hover {
+  color: #667eea;
+}
+
+/* Role Selector (Register) */
+.auth-role-selector {
+  margin-top: 8px;
+}
+
+.auth-role-selector .MuiSelect-select {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.auth-role-selector .MuiOutlinedInput-root:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.auth-role-selector .MuiOutlinedInput-root.Mui-focused {
+  background: white;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* Company Field (Register) */
+.auth-company-field {
+  position: relative;
+}
+
+.auth-company-helper {
+  color: #999;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+  .auth-paper {
+    border-radius: 16px;
+    margin: 8px;
+  }
+  
+  .auth-content {
+    padding: 24px 20px;
+  }
+  
+  .auth-title {
+    font-size: 1.75rem;
+  }
+  
+  .auth-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+  }
+  
+  .auth-logo-icon {
+    font-size: 28px;
+  }
+}
+
+/* Animation for form appearance */
+.auth-form-enter {
+  animation: formEnter 0.6s ease-out;
+}
+
+@keyframes formEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus management */
+.auth-form-field:focus-within {
+  z-index: 1;
+  position: relative;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .auth-paper {
+    border: 2px solid #000;
+    background: white;
+  }
+  
+  .auth-title {
+    -webkit-text-fill-color: #000;
+    background: none;
+  }
+  
+  .auth-submit-button {
+    background: #000;
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .auth-paper,
+  .auth-submit-button,
+  .auth-form-field .MuiOutlinedInput-root {
+    transition: none;
+  }
+  
+  .auth-paper:hover,
+  .auth-submit-button:hover {
+    transform: none;
+  }
+  
+  .auth-error,
+  .auth-success,
+  .auth-form-enter {
+    animation: none;
+  }
+}

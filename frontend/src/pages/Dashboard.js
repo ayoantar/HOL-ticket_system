@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Grid,
@@ -57,10 +58,15 @@ import { format } from 'date-fns';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { useResponsive } from '../hooks/useResponsive';
+import MobileTable from '../components/MobileTable';
+import '../styles/Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const { isMobile, isLargePhone, isIPhoneStyle, getContainerMaxWidth } = useResponsive();
   const theme = useTheme();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
@@ -321,15 +327,29 @@ const Dashboard = () => {
 
   const stats = getStatsFromRequests();
 
+  // Get current requests for pagination and mobile display
+  const currentRequests = data?.requests || [];
+
+  // Handle assign click for mobile table
+  const handleAssignClick = (request) => {
+    handleAssignRequest(request);
+  };
+
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container 
+      maxWidth={getContainerMaxWidth()} 
+      sx={{ 
+        py: { xs: 2, sm: 3, md: 4 },
+        px: { xs: 1, sm: 2, md: 3 }
+      }}
+    >
       {/* Header Section */}
-      <Box mb={4}>
+      <Box mb={{ xs: 2, sm: 3, md: 4 }}>
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} md={8}>
             <Box>
               <Typography 
-                variant="h3" 
+                variant={isIPhoneStyle() ? "h4" : "h3"}
                 fontWeight="700" 
                 color="text.primary"
                 gutterBottom
@@ -337,10 +357,11 @@ const Dashboard = () => {
                   background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
+                  WebkitTextFillColor: 'transparent',
+                  fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' }
                 }}
               >
-                Dashboard
+                {t('dashboard.title')}
               </Typography>
               
               
@@ -352,13 +373,17 @@ const Dashboard = () => {
                     setActiveTab(newValue);
                     setPage(0);
                   }}
+                  variant={isIPhoneStyle() ? "scrollable" : "standard"}
+                  scrollButtons={isIPhoneStyle() ? "auto" : false}
+                  allowScrollButtonsMobile={isIPhoneStyle()}
                   sx={{ 
                     mb: 2,
                     '& .MuiTab-root': {
                       textTransform: 'none',
                       fontWeight: 600,
-                      fontSize: '1rem',
-                      minHeight: '48px'
+                      fontSize: isIPhoneStyle() ? '0.875rem' : '1rem',
+                      minHeight: isIPhoneStyle() ? '52px' : '48px',
+                      minWidth: isIPhoneStyle() ? '120px' : 'auto'
                     }
                   }}
                 >
@@ -428,8 +453,8 @@ const Dashboard = () => {
       </Box>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: { xs: 3, sm: 3, md: 4 } }}>
+        <Grid item xs={6} sm={6} md={3}>
           <Fade in timeout={300}>
             <Card 
               elevation={0}
@@ -444,22 +469,32 @@ const Dashboard = () => {
                 }
               }}
             >
-              <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={2}>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
                   <Avatar
                     sx={{
                       backgroundColor: theme.palette.primary.main,
-                      width: 56,
-                      height: 56
+                      width: { xs: 48, sm: 52, md: 56 },
+                      height: { xs: 48, sm: 52, md: 56 }
                     }}
                   >
-                    <ConfirmationNumber />
+                    <ConfirmationNumber sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" fontWeight="700" color="text.primary">
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      fontWeight="700" 
+                      color="text.primary"
+                      sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}
+                    >
                       {isLoading ? <Skeleton width={40} /> : stats.total}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      fontWeight={500}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       Total Requests
                     </Typography>
                   </Box>
@@ -469,7 +504,7 @@ const Dashboard = () => {
           </Fade>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <Fade in timeout={500}>
             <Card 
               elevation={0}
@@ -484,22 +519,32 @@ const Dashboard = () => {
                 }
               }}
             >
-              <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={2}>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
                   <Avatar
                     sx={{
                       backgroundColor: theme.palette.warning.main,
-                      width: 56,
-                      height: 56
+                      width: { xs: 48, sm: 52, md: 56 },
+                      height: { xs: 48, sm: 52, md: 56 }
                     }}
                   >
-                    <Schedule />
+                    <Schedule sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" fontWeight="700" color="text.primary">
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      fontWeight="700" 
+                      color="text.primary"
+                      sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}
+                    >
                       {isLoading ? <Skeleton width={40} /> : stats.pending}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      fontWeight={500}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       Pending
                     </Typography>
                   </Box>
@@ -509,7 +554,7 @@ const Dashboard = () => {
           </Fade>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <Fade in timeout={700}>
             <Card 
               elevation={0}
@@ -524,22 +569,32 @@ const Dashboard = () => {
                 }
               }}
             >
-              <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={2}>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
                   <Avatar
                     sx={{
                       backgroundColor: theme.palette.info.main,
-                      width: 56,
-                      height: 56
+                      width: { xs: 48, sm: 52, md: 56 },
+                      height: { xs: 48, sm: 52, md: 56 }
                     }}
                   >
-                    <TrendingUp />
+                    <TrendingUp sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" fontWeight="700" color="text.primary">
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      fontWeight="700" 
+                      color="text.primary"
+                      sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}
+                    >
                       {isLoading ? <Skeleton width={40} /> : stats.inProgress}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      fontWeight={500}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       In Progress
                     </Typography>
                   </Box>
@@ -549,7 +604,7 @@ const Dashboard = () => {
           </Fade>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={6} sm={6} md={3}>
           <Fade in timeout={900}>
             <Card 
               elevation={0}
@@ -564,22 +619,32 @@ const Dashboard = () => {
                 }
               }}
             >
-              <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={2}>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
                   <Avatar
                     sx={{
                       backgroundColor: theme.palette.success.main,
-                      width: 56,
-                      height: 56
+                      width: { xs: 48, sm: 52, md: 56 },
+                      height: { xs: 48, sm: 52, md: 56 }
                     }}
                   >
-                    <Assignment />
+                    <Assignment sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography variant="h4" fontWeight="700" color="text.primary">
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      fontWeight="700" 
+                      color="text.primary"
+                      sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}
+                    >
                       {isLoading ? <Skeleton width={40} /> : stats.completed}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      fontWeight={500}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       Completed
                     </Typography>
                   </Box>
@@ -601,21 +666,25 @@ const Dashboard = () => {
           backdropFilter: 'blur(20px)'
         }}
       >
-        <CardContent sx={{ p: 3 }}>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+          <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="center">
+            <Grid item xs={12} sm="auto">
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Avatar
                   sx={{
                     backgroundColor: alpha(theme.palette.primary.main, 0.1),
                     color: theme.palette.primary.main,
-                    width: 40,
-                    height: 40
+                    width: { xs: 36, sm: 40 },
+                    height: { xs: 36, sm: 40 }
                   }}
                 >
                   <FilterList fontSize="small" />
                 </Avatar>
-                <Typography variant="h6" fontWeight={600}>
+                <Typography 
+                  variant={isIPhoneStyle() ? "subtitle1" : "h6"} 
+                  fontWeight={600}
+                  sx={{ fontSize: { xs: '1rem', sm: '1.125rem' } }}
+                >
                   Filter Requests
                 </Typography>
               </Stack>
@@ -679,8 +748,18 @@ const Dashboard = () => {
             Recent Requests
           </Typography>
         </Box>
-        <TableContainer>
-          <Table>
+        {/* Mobile Table for small screens */}
+        {isIPhoneStyle() ? (
+          <MobileTable 
+            requests={currentRequests}
+            onView={handleRequestClick}
+            onAssign={user?.role === 'admin' ? handleAssignClick : undefined}
+            showAssignButton={user?.role === 'admin'}
+            loading={isLoading}
+          />
+        ) : (
+          <TableContainer>
+            <Table>
             <TableHead>
               <TableRow sx={{ 
                 backgroundColor: alpha(theme.palette.primary.main, 0.02)
@@ -943,6 +1022,7 @@ const Dashboard = () => {
             />
           )}
         </TableContainer>
+        )}
       </Card>
 
       {/* Assignment Dialog */}

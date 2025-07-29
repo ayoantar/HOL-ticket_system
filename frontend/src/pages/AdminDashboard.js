@@ -75,6 +75,7 @@ import { API_BASE_URL } from '../config/api';
 import SystemSettingsForm from '../components/SystemSettingsForm';
 import EmailTemplateEditor from '../components/EmailTemplateEditor';
 import MobileUserTable from '../components/MobileUserCard';
+import '../styles/AdminDashboard.css';
 import MobileDepartmentTable from '../components/MobileDepartmentCard';
 import MobileReportsSection from '../components/MobileReportsSection';
 

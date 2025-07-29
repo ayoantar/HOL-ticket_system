@@ -37,6 +37,7 @@ import {
   Assessment,
   Timeline
 } from '@mui/icons-material';
+import '../styles/MobileComponents.css';
 
 const MobileReportsSection = ({
   analyticsData,

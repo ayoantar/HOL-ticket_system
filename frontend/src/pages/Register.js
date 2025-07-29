@@ -12,6 +12,7 @@ import {
   Grid
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
+import '../styles/Auth.css';
 
 const Register = () => {
   const navigate = useNavigate();
