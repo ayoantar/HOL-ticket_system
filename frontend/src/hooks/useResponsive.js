@@ -3,11 +3,12 @@ import { useTheme, useMediaQuery } from '@mui/material';
 export const useResponsive = () => {
   const theme = useTheme();
   
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // 0-479px
-  const isLargePhone = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 480-767px  
-  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 768-1023px
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg')); // 1024px+
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl')); // 1440px+
+  // Fixed breakpoint logic - down('sm') means 0-479px, down('md') means 0-767px  
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // 0-479px (xs)
+  const isLargePhone = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 480-767px (sm)
+  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 768-1023px (md)
+  const isDesktop = useMediaQuery(theme.breakpoints.between('lg', 'xl')); // 1024-1439px (lg)
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl')); // 1440px+ (xl)
   
   // Specific breakpoints
   const isXs = useMediaQuery(theme.breakpoints.only('xs'));
@@ -44,20 +45,38 @@ export const useResponsive = () => {
   };
   
   const shouldShowDrawer = () => {
-    return isTablet || isDesktop;
+    return isTablet || isDesktop || isLargeScreen;
   };
   
   const getContainerMaxWidth = () => {
-    if (isMobile) return 'xs';
-    if (isLargePhone) return 'sm';
-    if (isTablet) return 'md';
-    if (isDesktop) return 'lg';
-    return 'xl';
+    if (isMobile) return 'xs';        // 0-479px
+    if (isLargePhone) return 'sm';    // 480-767px
+    if (isTablet) return 'md';        // 768-1023px
+    if (isDesktop) return 'lg';       // 1024-1439px
+    if (isLargeScreen) return 'xl';   // 1440px+
+    // Fallback for desktop - if none of the above match, default to large
+    return 'lg';
   };
   
-  // iPhone 15 Plus specific optimizations
+  // iPhone 15 Plus specific optimizations - only show mobile cards for screens under 768px
   const isIPhoneStyle = () => {
-    return isMobile || isLargePhone;
+    // More explicit: use mobile cards only for screens smaller than tablet (768px)
+    const result = useMediaQuery(theme.breakpoints.down('md')); // 0-767px
+    
+    // Debug logging - remove in production
+    if (typeof window !== 'undefined') {
+      console.log('Responsive Debug:', {
+        screenWidth: window.innerWidth,
+        isMobile,
+        isLargePhone,
+        isTablet,
+        isDesktop,
+        isLargeScreen,
+        isIPhoneStyle: result,
+        mdBreakpoint: theme.breakpoints.values.md
+      });
+    }
+    return result;
   };
   
   return {

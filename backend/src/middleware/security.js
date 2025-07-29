@@ -138,7 +138,8 @@ exports.validateFileUpload = (req, res, next) => {
 exports.validateLogin = [
   body('email')
     .isEmail()
-    .normalizeEmail()
+    .trim()
+    .toLowerCase()
     .withMessage('Please provide a valid email'),
   body('password')
     .isLength({ min: 6 })
@@ -358,6 +359,8 @@ exports.csrfProtection = (req, res, next) => {
     'http://localhost:3001', // Alternative React port
     'http://localhost:3002', // Houses of Light frontend port
     'http://localhost:5002', // Backend server (for proxy)
+    'https://30fe12b4db97.ngrok-free.app', // Your ngrok frontend URL
+    'https://30fe12b4db97.ngrok-free.app/login', // Specific login URL
   ];
   
   const origin = req.headers.origin || req.headers.referer;

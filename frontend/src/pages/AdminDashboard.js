@@ -69,14 +69,19 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useResponsive } from '../hooks/useResponsive';
 import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../config/api';
 import SystemSettingsForm from '../components/SystemSettingsForm';
 import EmailTemplateEditor from '../components/EmailTemplateEditor';
+import MobileUserTable from '../components/MobileUserCard';
+import MobileDepartmentTable from '../components/MobileDepartmentCard';
+import MobileReportsSection from '../components/MobileReportsSection';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isMobile, isLargePhone, isIPhoneStyle, getContainerMaxWidth } = useResponsive();
   const theme = useTheme();
   const queryClient = useQueryClient();
   
@@ -188,7 +193,7 @@ const AdminDashboard = () => {
   // Redirect if not admin
   if (user?.role !== 'admin') {
     return (
-      <Container maxWidth="lg">
+      <Container maxWidth={getContainerMaxWidth()}>
         <Typography variant="h4" color="error">
           Access Denied - Admin Only
         </Typography>
@@ -623,23 +628,28 @@ const AdminDashboard = () => {
   };
   
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth={getContainerMaxWidth()} sx={{ py: { xs: 2, sm: 3, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header */}
-      <Box mb={4}>
+      <Box mb={{ xs: 3, sm: 3, md: 4 }}>
         <Typography 
-          variant="h3" 
+          variant={isIPhoneStyle() ? "h4" : "h3"} 
           fontWeight="700" 
           gutterBottom
           sx={{ 
             background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' }
           }}
         >
           Admin Dashboard
         </Typography>
-        <Typography variant="h6" color="text.secondary">
+        <Typography 
+          variant={isIPhoneStyle() ? "body1" : "h6"} 
+          color="text.secondary"
+          sx={{ fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' } }}
+        >
           Manage requests, users, and system settings
         </Typography>
       </Box>
@@ -649,32 +659,40 @@ const AdminDashboard = () => {
         <Tabs 
           value={activeTab} 
           onChange={(e, newValue) => setActiveTab(newValue)}
-          sx={{ px: 2 }}
+          variant={isIPhoneStyle() ? "scrollable" : "standard"}
+          scrollButtons={isIPhoneStyle() ? "auto" : false}
+          allowScrollButtonsMobile={isIPhoneStyle()}
+          sx={{ 
+            px: { xs: 1, sm: 2 },
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+              minHeight: { xs: '56px', sm: '48px' },
+              minWidth: { xs: '120px', sm: 'auto' },
+              padding: { xs: '12px 8px', sm: '12px 16px' }
+            }
+          }}
         >
           <Tab 
             icon={<People />} 
             label="User Management" 
-            sx={{ textTransform: 'none', fontWeight: 600 }}
           />
           <Tab 
             icon={<Business />} 
             label="Department Management" 
-            sx={{ textTransform: 'none', fontWeight: 600 }}
           />
           <Tab 
             icon={<Analytics />} 
             label="Analytics & Reports" 
-            sx={{ textTransform: 'none', fontWeight: 600 }}
           />
           <Tab 
             icon={<Settings />} 
             label="System Settings" 
-            sx={{ textTransform: 'none', fontWeight: 600 }}
           />
           <Tab 
             icon={<Email />} 
             label="Email Templates" 
-            sx={{ textTransform: 'none', fontWeight: 600 }}
           />
         </Tabs>
       </Card>
@@ -684,19 +702,31 @@ const AdminDashboard = () => {
       {/* User Management Tab */}
       <TabPanel value={activeTab} index={0}>
         {/* User Stats Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
+        <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: { xs: 3, sm: 3, md: 4 } }}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  <Avatar sx={{ backgroundColor: theme.palette.primary.main }}>
-                    <People />
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
+                  <Avatar sx={{ 
+                    backgroundColor: theme.palette.primary.main,
+                    width: { xs: 40, sm: 48, md: 56 },
+                    height: { xs: 40, sm: 48, md: 56 }
+                  }}>
+                    <People sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography color="textSecondary" gutterBottom>
+                    <Typography 
+                      color="textSecondary" 
+                      gutterBottom
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       Total Users
                     </Typography>
-                    <Typography variant="h4" fontWeight={700}>
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      fontWeight={700}
+                      sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}
+                    >
                       {userStats?.total || 0}
                     </Typography>
                   </Box>
@@ -704,18 +734,31 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  <Avatar sx={{ backgroundColor: theme.palette.success.main }}>
-                    <ToggleOn />
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
+                  <Avatar sx={{ 
+                    backgroundColor: theme.palette.success.main,
+                    width: { xs: 40, sm: 48, md: 56 },
+                    height: { xs: 40, sm: 48, md: 56 }
+                  }}>
+                    <ToggleOn sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography color="textSecondary" gutterBottom>
+                    <Typography 
+                      color="textSecondary" 
+                      gutterBottom
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       Active Users
                     </Typography>
-                    <Typography variant="h4" color="success.main" fontWeight={700}>
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      color="success.main" 
+                      fontWeight={700}
+                      sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}
+                    >
                       {userStats?.active || 0}
                     </Typography>
                   </Box>
@@ -723,18 +766,31 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  <Avatar sx={{ backgroundColor: theme.palette.warning.main }}>
-                    <AdminPanelSettings />
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
+                  <Avatar sx={{ 
+                    backgroundColor: theme.palette.warning.main,
+                    width: { xs: 40, sm: 48, md: 56 },
+                    height: { xs: 40, sm: 48, md: 56 }
+                  }}>
+                    <AdminPanelSettings sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography color="textSecondary" gutterBottom>
+                    <Typography 
+                      color="textSecondary" 
+                      gutterBottom
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       Admins
                     </Typography>
-                    <Typography variant="h4" color="warning.main" fontWeight={700}>
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      color="warning.main" 
+                      fontWeight={700}
+                      sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}
+                    >
                       {userStats?.admins || 0}
                     </Typography>
                   </Box>
@@ -742,18 +798,31 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  <Avatar sx={{ backgroundColor: theme.palette.info.main }}>
-                    <People />
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
+                  <Avatar sx={{ 
+                    backgroundColor: theme.palette.info.main,
+                    width: { xs: 40, sm: 48, md: 56 },
+                    height: { xs: 40, sm: 48, md: 56 }
+                  }}>
+                    <People sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
                   </Avatar>
                   <Box>
-                    <Typography color="textSecondary" gutterBottom>
+                    <Typography 
+                      color="textSecondary" 
+                      gutterBottom
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    >
                       Regular Users
                     </Typography>
-                    <Typography variant="h4" color="info.main" fontWeight={700}>
+                    <Typography 
+                      variant={isIPhoneStyle() ? "h5" : "h4"} 
+                      color="info.main" 
+                      fontWeight={700}
+                      sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}
+                    >
                       {userStats?.users || 0}
                     </Typography>
                   </Box>
@@ -765,12 +834,26 @@ const AdminDashboard = () => {
         
         {/* User Filters */}
         <Card elevation={0} sx={{ mb: 3, borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-          <CardContent>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item>
-                <Avatar sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1), color: theme.palette.primary.main }}>
-                  <FilterList />
-                </Avatar>
+          <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+            <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} alignItems="center">
+              <Grid item xs={12} sm="auto">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Avatar sx={{ 
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1), 
+                    color: theme.palette.primary.main,
+                    width: { xs: 36, sm: 40 },
+                    height: { xs: 36, sm: 40 }
+                  }}>
+                    <FilterList fontSize="small" />
+                  </Avatar>
+                  <Typography 
+                    variant={isIPhoneStyle() ? "subtitle1" : "h6"} 
+                    fontWeight={600}
+                    sx={{ fontSize: { xs: '1rem', sm: '1.125rem' } }}
+                  >
+                    Filter Users
+                  </Typography>
+                </Stack>
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
@@ -782,7 +865,7 @@ const AdminDashboard = () => {
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid item xs={6} sm={6} md={3}>
                 <TextField
                   select
                   size="small"
@@ -820,17 +903,39 @@ const AdminDashboard = () => {
               </Button>
             </Stack>
           </Box>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
-                  <TableCell sx={{ fontWeight: 600 }}>User</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Department</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Created</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+          {/* Mobile User Cards for small screens */}
+          {isIPhoneStyle() ? (
+            <MobileUserTable 
+              users={users?.users || []}
+              loading={usersLoading}
+              onEdit={(user) => {
+                setSelectedUser(user);
+                setEditUserDialog(true);
+              }}
+              onResetPassword={(user) => {
+                setSelectedUser(user);
+                setPasswordResetDialog(true);
+              }}
+              onToggleStatus={handleToggleUserStatus}
+              onDelete={handleDeleteUser}
+            />
+          ) : (
+            <TableContainer sx={{ 
+              overflowX: 'auto',
+              '& .MuiTable-root': {
+                minWidth: { xs: 700, sm: 'auto' }
+              }
+            }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>User</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Role</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Department</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Created</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -975,6 +1080,7 @@ const AdminDashboard = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          )}
         </Card>
       </TabPanel>
       
@@ -982,7 +1088,7 @@ const AdminDashboard = () => {
       <TabPanel value={activeTab} index={1}>
         {/* Department Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={2}>
@@ -1001,7 +1107,7 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={2}>
@@ -1020,7 +1126,7 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={2}>
@@ -1039,7 +1145,7 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={2}>
@@ -1077,15 +1183,32 @@ const AdminDashboard = () => {
               </Button>
             </Stack>
           </Box>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
-                  <TableCell sx={{ fontWeight: 600 }}>Department</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Lead</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Employees</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+          {/* Mobile Department Cards for small screens */}
+          {isIPhoneStyle() ? (
+            <MobileDepartmentTable 
+              departments={departments}
+              loading={departmentsLoading}
+              onEdit={(department) => {
+                setSelectedDepartment(department);
+                setEditDepartmentDialog(true);
+              }}
+              onDelete={handleDeleteDepartment}
+            />
+          ) : (
+            <TableContainer sx={{ 
+              overflowX: 'auto',
+              '& .MuiTable-root': {
+                minWidth: { xs: 700, sm: 'auto' }
+              }
+            }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.02) }}>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Department</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Lead</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Employees</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -1189,365 +1312,404 @@ const AdminDashboard = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          )}
         </Card>
       </TabPanel>
       
       {/* Analytics & Reports Tab */}
       <TabPanel value={activeTab} index={2}>
-        <Box mb={4}>
-          <Typography variant="h5" gutterBottom>
-            Analytics & Reports
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            View comprehensive analytics, generate reports, and track system performance.
-          </Typography>
-          
-          {/* Timeframe Filter */}
-          <Card elevation={0} sx={{ mb: 3, borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-            <CardContent>
-              <Stack direction="row" alignItems="center" spacing={2}>
-                <Avatar sx={{ backgroundColor: alpha(theme.palette.info.main, 0.1), color: theme.palette.info.main }}>
-                  <FilterList />
-                </Avatar>
-                <TextField
-                  select
-                  size="small"
-                  label="Timeframe"
-                  value={analyticsTimeframe}
-                  onChange={(e) => setAnalyticsTimeframe(e.target.value)}
-                  sx={{ minWidth: 150, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                >
-                  <MenuItem value="7">Last 7 days</MenuItem>
-                  <MenuItem value="30">Last 30 days</MenuItem>
-                  <MenuItem value="90">Last 3 months</MenuItem>
-                  <MenuItem value="365">Last year</MenuItem>
-                </TextField>
-              </Stack>
-            </CardContent>
-          </Card>
-          
-          {/* Export and Refresh Options */}
-          <Card elevation={0} sx={{ mb: 3, borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-            <CardContent>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Avatar sx={{ backgroundColor: alpha(theme.palette.success.main, 0.1), color: theme.palette.success.main }}>
-                    <GetApp />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      Export Reports
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Download analytics data in various formats
-                    </Typography>
-                  </Box>
-                </Box>
-                <Stack direction="row" spacing={2} flexWrap="wrap">
-                  <Button
-                    variant="outlined"
-                    startIcon={<TableChart />}
-                    onClick={() => handleExportCSV('analytics')}
-                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
-                  >
-                    Analytics CSV
-                  </Button>
-                  <Button
-                    variant="outlined" 
-                    startIcon={<TableChart />}
-                    onClick={() => handleExportCSV('performance')}
-                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
-                  >
-                    Performance CSV
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<TableChart />}
-                    onClick={() => handleExportCSV('activity')}
-                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
-                  >
-                    Activity CSV
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<PictureAsPdf />}
-                    onClick={handleExportPDF}
-                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
-                  >
-                    Export PDF
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Refresh />}
-                    onClick={handleRefreshData}
-                    sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
-                  >
-                    Refresh Data
-                  </Button>
-                </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Box>
-
-        {analyticsLoading || metricsLoading ? (
-          <Grid container spacing={3}>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <CardContent>
-                    <Skeleton height={120} />
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+        {isIPhoneStyle() ? (
+          <Box>
+            {/* Mobile Header */}
+            <Box mb={3}>
+              <Typography 
+                variant="h5" 
+                fontWeight="700" 
+                gutterBottom
+                sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+              >
+                Analytics & Reports
+              </Typography>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              >
+                View analytics, generate reports, and track performance.
+              </Typography>
+            </Box>
+            
+            {/* Mobile Reports Component */}
+            <MobileReportsSection
+              analyticsData={analyticsData}
+              systemMetrics={systemMetrics}
+              analyticsTimeframe={analyticsTimeframe}
+              setAnalyticsTimeframe={setAnalyticsTimeframe}
+              analyticsLoading={analyticsLoading}
+              metricsLoading={metricsLoading}
+              handleExportCSV={handleExportCSV}
+              handleExportPDF={handleExportPDF}
+              handleRefreshData={handleRefreshData}
+            />
+          </Box>
         ) : (
-          <>
-            {/* Overview Statistics */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-              <Grid item xs={12} sm={6} md={3}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Avatar sx={{ backgroundColor: theme.palette.primary.main }}>
-                        <Analytics />
-                      </Avatar>
-                      <Box>
-                        <Typography color="textSecondary" gutterBottom>
-                          Total Requests
-                        </Typography>
-                        <Typography variant="h4" fontWeight={700}>
-                          {analyticsData?.overview?.total_requests || 0}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Avatar sx={{ backgroundColor: theme.palette.success.main }}>
-                        <Add />
-                      </Avatar>
-                      <Box>
-                        <Typography color="textSecondary" gutterBottom>
-                          Recent Requests ({analyticsTimeframe}d)
-                        </Typography>
-                        <Typography variant="h4" color="success.main" fontWeight={700}>
-                          {analyticsData?.overview?.recent_requests || 0}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Avatar sx={{ backgroundColor: theme.palette.warning.main }}>
-                        <People />
-                      </Avatar>
-                      <Box>
-                        <Typography color="textSecondary" gutterBottom>
-                          Active Users (30d)
-                        </Typography>
-                        <Typography variant="h4" color="warning.main" fontWeight={700}>
-                          {systemMetrics?.user_activity?.active_users || 0}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <CardContent>
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Avatar sx={{ backgroundColor: theme.palette.info.main }}>
-                        <Settings />
-                      </Avatar>
-                      <Box>
-                        <Typography color="textSecondary" gutterBottom>
-                          Avg. Completion Time
-                        </Typography>
-                        <Typography variant="h4" color="info.main" fontWeight={700}>
-                          {analyticsData?.overview?.avg_completion_time || 0}d
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
-            {/* Status and Type Breakdown */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-              <Grid item xs={12} md={6}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                    <Typography variant="h6" fontWeight={600}>
-                      Request Status Breakdown
-                    </Typography>
-                  </Box>
-                  <CardContent>
-                    {analyticsData?.status_breakdown?.map((status, index) => (
-                      <Box key={status.status} sx={{ mb: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                          <Chip
-                            label={status.status.charAt(0).toUpperCase() + status.status.slice(1)}
-                            size="small"
-                            color={status.status === 'completed' ? 'success' : status.status === 'in_progress' ? 'primary' : 'default'}
-                            sx={{ borderRadius: '8px', fontWeight: 500 }}
-                          />
-                          <Typography variant="body2" fontWeight={600}>
-                            {status.count}
-                          </Typography>
-                        </Stack>
-                        <Box sx={{ width: '100%', height: 8, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '4px' }}>
-                          <Box
-                            sx={{
-                              width: `${(status.count / (analyticsData?.overview?.total_requests || 1)) * 100}%`,
-                              height: '100%',
-                              backgroundColor: status.status === 'completed' ? theme.palette.success.main : 
-                                              status.status === 'in_progress' ? theme.palette.primary.main : 
-                                              theme.palette.grey[400],
-                              borderRadius: '4px'
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    ))}
-                  </CardContent>
-                </Card>
-              </Grid>
+          <Box>
+            <Box mb={4}>
+              <Typography variant="h5" gutterBottom>
+                Analytics & Reports
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                View comprehensive analytics, generate reports, and track system performance.
+              </Typography>
               
-              <Grid item xs={12} md={6}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                    <Typography variant="h6" fontWeight={600}>
-                      Request Type Distribution
-                    </Typography>
-                  </Box>
-                  <CardContent>
-                    {analyticsData?.type_breakdown?.map((type, index) => (
-                      <Box key={type.request_type} sx={{ mb: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                          <Chip
-                            label={type.request_type.charAt(0).toUpperCase() + type.request_type.slice(1)}
-                            size="small"
-                            color="primary"
-                            variant="outlined"
-                            sx={{ borderRadius: '8px', fontWeight: 500 }}
-                          />
-                          <Typography variant="body2" fontWeight={600}>
-                            {type.count}
-                          </Typography>
-                        </Stack>
-                        <Box sx={{ width: '100%', height: 8, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '4px' }}>
-                          <Box
-                            sx={{
-                              width: `${(type.count / (analyticsData?.overview?.total_requests || 1)) * 100}%`,
-                              height: '100%',
-                              backgroundColor: theme.palette.primary.main,
-                              borderRadius: '4px'
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    ))}
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
-            {/* Top Performers and Department Stats */}
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                    <Typography variant="h6" fontWeight={600}>
-                      Top Performers
-                    </Typography>
-                  </Box>
-                  <CardContent>
-                    {analyticsData?.top_performers?.length === 0 ? (
-                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                        No completed requests yet
-                      </Typography>
-                    ) : (
-                      analyticsData?.top_performers?.map((performer, index) => (
-                        <Box key={performer.assigned_to} sx={{ mb: 2 }}>
-                          <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar sx={{ width: 32, height: 32, fontSize: '0.875rem' }}>
-                              {performer.assignedUser?.name?.charAt(0) || '?'}
-                            </Avatar>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="body2" fontWeight={600}>
-                                {performer.assignedUser?.name || 'Unknown'}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {performer.assignedUser?.department || 'No department'}
-                              </Typography>
-                            </Box>
-                            <Chip
-                              label={`${performer.dataValues?.completed_count || 0} completed`}
-                              size="small"
-                              color="success"
-                              sx={{ borderRadius: '8px', fontWeight: 500 }}
-                            />
-                          </Stack>
-                        </Box>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+              {/* Timeframe Filter */}
+              <Card elevation={0} sx={{ mb: 3, borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ backgroundColor: alpha(theme.palette.info.main, 0.1), color: theme.palette.info.main }}>
+                      <FilterList />
+                    </Avatar>
+                    <TextField
+                      select
+                      size="small"
+                      label="Timeframe"
+                      value={analyticsTimeframe}
+                      onChange={(e) => setAnalyticsTimeframe(e.target.value)}
+                      sx={{ minWidth: 150, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                    >
+                      <MenuItem value="7">Last 7 days</MenuItem>
+                      <MenuItem value="30">Last 30 days</MenuItem>
+                      <MenuItem value="90">Last 3 months</MenuItem>
+                      <MenuItem value="365">Last year</MenuItem>
+                    </TextField>
+                  </Stack>
+                </CardContent>
+              </Card>
               
-              <Grid item xs={12} md={6}>
-                <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                  <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                    <Typography variant="h6" fontWeight={600}>
-                      Department Workload
-                    </Typography>
-                  </Box>
-                  <CardContent>
-                    {analyticsData?.department_breakdown?.length === 0 ? (
-                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                        No department assignments yet
-                      </Typography>
-                    ) : (
-                      analyticsData?.department_breakdown?.map((dept, index) => (
-                        <Box key={dept.department} sx={{ mb: 2 }}>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                            <Typography variant="body2" fontWeight={600}>
-                              {dept.department || 'Unassigned'}
+              {/* Export and Refresh Options */}
+              <Card elevation={0} sx={{ mb: 3, borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Avatar sx={{ backgroundColor: alpha(theme.palette.success.main, 0.1), color: theme.palette.success.main }}>
+                        <GetApp />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          Export Reports
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Download analytics data in various formats
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Stack direction="row" spacing={2} flexWrap="wrap">
+                      <Button
+                        variant="outlined"
+                        startIcon={<TableChart />}
+                        onClick={() => handleExportCSV('analytics')}
+                        sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                      >
+                        Analytics CSV
+                      </Button>
+                      <Button
+                        variant="outlined" 
+                        startIcon={<TableChart />}
+                        onClick={() => handleExportCSV('performance')}
+                        sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                      >
+                        Performance CSV
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        startIcon={<TableChart />}
+                        onClick={() => handleExportCSV('activity')}
+                        sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                      >
+                        Activity CSV
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        startIcon={<PictureAsPdf />}
+                        onClick={handleExportPDF}
+                        sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                      >
+                        Export PDF
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        startIcon={<Refresh />}
+                        onClick={handleRefreshData}
+                        sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}
+                      >
+                        Refresh Data
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Box>
+
+            {analyticsLoading || metricsLoading ? (
+              <Grid container spacing={3}>
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <CardContent>
+                        <Skeleton height={120} />
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <>
+                {/* Overview Statistics */}
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={6} sm={6} md={3}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <CardContent>
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Avatar sx={{ backgroundColor: theme.palette.primary.main }}>
+                            <Analytics />
+                          </Avatar>
+                          <Box>
+                            <Typography color="textSecondary" gutterBottom>
+                              Total Requests
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {dept.count} requests
+                            <Typography variant="h4" fontWeight={700}>
+                              {analyticsData?.overview?.total_requests || 0}
                             </Typography>
-                          </Stack>
-                          <Box sx={{ width: '100%', height: 6, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '3px' }}>
-                            <Box
-                              sx={{
-                                width: `${(dept.count / Math.max(...(analyticsData?.department_breakdown?.map(d => d.count) || [1]))) * 100}%`,
-                                height: '100%',
-                                backgroundColor: theme.palette.secondary.main,
-                                borderRadius: '3px'
-                              }}
-                            />
                           </Box>
-                        </Box>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={6} sm={6} md={3}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <CardContent>
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Avatar sx={{ backgroundColor: theme.palette.success.main }}>
+                            <Add />
+                          </Avatar>
+                          <Box>
+                            <Typography color="textSecondary" gutterBottom>
+                              Recent Requests ({analyticsTimeframe}d)
+                            </Typography>
+                            <Typography variant="h4" color="success.main" fontWeight={700}>
+                              {analyticsData?.overview?.recent_requests || 0}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={6} sm={6} md={3}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <CardContent>
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Avatar sx={{ backgroundColor: theme.palette.warning.main }}>
+                            <People />
+                          </Avatar>
+                          <Box>
+                            <Typography color="textSecondary" gutterBottom>
+                              Active Users (30d)
+                            </Typography>
+                            <Typography variant="h4" color="warning.main" fontWeight={700}>
+                              {systemMetrics?.user_activity?.active_users || 0}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={6} sm={6} md={3}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <CardContent>
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Avatar sx={{ backgroundColor: theme.palette.info.main }}>
+                            <Settings />
+                          </Avatar>
+                          <Box>
+                            <Typography color="textSecondary" gutterBottom>
+                              Avg. Completion Time
+                            </Typography>
+                            <Typography variant="h4" color="info.main" fontWeight={700}>
+                              {analyticsData?.overview?.avg_completion_time || 0}d
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+
+                {/* Status and Type Breakdown */}
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                        <Typography variant="h6" fontWeight={600}>
+                          Request Status Breakdown
+                        </Typography>
+                      </Box>
+                      <CardContent>
+                        {analyticsData?.status_breakdown?.map((status, index) => (
+                          <Box key={status.status} sx={{ mb: 2 }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                              <Chip
+                                label={status.status.charAt(0).toUpperCase() + status.status.slice(1)}
+                                size="small"
+                                color={status.status === 'completed' ? 'success' : status.status === 'in_progress' ? 'primary' : 'default'}
+                                sx={{ borderRadius: '8px', fontWeight: 500 }}
+                              />
+                              <Typography variant="body2" fontWeight={600}>
+                                {status.count}
+                              </Typography>
+                            </Stack>
+                            <Box sx={{ width: '100%', height: 8, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '4px' }}>
+                              <Box
+                                sx={{
+                                  width: `${(status.count / (analyticsData?.overview?.total_requests || 1)) * 100}%`,
+                                  height: '100%',
+                                  backgroundColor: status.status === 'completed' ? theme.palette.success.main : 
+                                                  status.status === 'in_progress' ? theme.palette.primary.main : 
+                                                  theme.palette.grey[400],
+                                  borderRadius: '4px'
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                        <Typography variant="h6" fontWeight={600}>
+                          Request Type Distribution
+                        </Typography>
+                      </Box>
+                      <CardContent>
+                        {analyticsData?.type_breakdown?.map((type, index) => (
+                          <Box key={type.request_type} sx={{ mb: 2 }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                              <Chip
+                                label={type.request_type.charAt(0).toUpperCase() + type.request_type.slice(1)}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                                sx={{ borderRadius: '8px', fontWeight: 500 }}
+                              />
+                              <Typography variant="body2" fontWeight={600}>
+                                {type.count}
+                              </Typography>
+                            </Stack>
+                            <Box sx={{ width: '100%', height: 8, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '4px' }}>
+                              <Box
+                                sx={{
+                                  width: `${(type.count / (analyticsData?.overview?.total_requests || 1)) * 100}%`,
+                                  height: '100%',
+                                  backgroundColor: theme.palette.primary.main,
+                                  borderRadius: '4px'
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+
+                {/* Top Performers and Department Stats */}
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                        <Typography variant="h6" fontWeight={600}>
+                          Top Performers
+                        </Typography>
+                      </Box>
+                      <CardContent>
+                        {analyticsData?.top_performers?.length === 0 ? (
+                          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                            No completed requests yet
+                          </Typography>
+                        ) : (
+                          analyticsData?.top_performers?.map((performer, index) => (
+                            <Box key={performer.assigned_to} sx={{ mb: 2 }}>
+                              <Stack direction="row" alignItems="center" spacing={2}>
+                                <Avatar sx={{ width: 32, height: 32, fontSize: '0.875rem' }}>
+                                  {performer.assignedUser?.name?.charAt(0) || '?'}
+                                </Avatar>
+                                <Box sx={{ flex: 1 }}>
+                                  <Typography variant="body2" fontWeight={600}>
+                                    {performer.assignedUser?.name || 'Unknown'}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {performer.assignedUser?.department || 'No department'}
+                                  </Typography>
+                                </Box>
+                                <Chip
+                                  label={`${performer.dataValues?.completed_count || 0} completed`}
+                                  size="small"
+                                  color="success"
+                                  sx={{ borderRadius: '8px', fontWeight: 500 }}
+                                />
+                              </Stack>
+                            </Box>
+                          ))
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                      <Box sx={{ p: 3, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                        <Typography variant="h6" fontWeight={600}>
+                          Department Workload
+                        </Typography>
+                      </Box>
+                      <CardContent>
+                        {analyticsData?.department_breakdown?.length === 0 ? (
+                          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                            No department assignments yet
+                          </Typography>
+                        ) : (
+                          analyticsData?.department_breakdown?.map((dept, index) => (
+                            <Box key={dept.department} sx={{ mb: 2 }}>
+                              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {dept.department || 'Unassigned'}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {dept.count} requests
+                                </Typography>
+                              </Stack>
+                              <Box sx={{ width: '100%', height: 6, backgroundColor: alpha(theme.palette.divider, 0.1), borderRadius: '3px' }}>
+                                <Box
+                                  sx={{
+                                    width: `${(dept.count / Math.max(...(analyticsData?.department_breakdown?.map(d => d.count) || [1]))) * 100}%`,
+                                    height: '100%',
+                                    backgroundColor: theme.palette.secondary.main,
+                                    borderRadius: '3px'
+                                  }}
+                                />
+                              </Box>
+                            </Box>
+                          ))
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+              </>
+            )}
+          </Box>
         )}
       </TabPanel>
       
