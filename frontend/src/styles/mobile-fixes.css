@@ -1,0 +1,109 @@
+/* Mobile-specific fixes for iPhone and other devices */
+
+/* Prevent iOS Safari from zooming on form inputs */
+@media screen and (max-width: 767px) {
+  select,
+  textarea,
+  input[type="text"],
+  input[type="password"],
+  input[type="datetime"],
+  input[type="datetime-local"],
+  input[type="date"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"],
+  input[type="number"],
+  input[type="email"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="color"] {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+}
+
+/* iPhone 15 Plus specific optimizations */
+@media screen and (min-width: 414px) and (max-width: 430px) and (-webkit-min-device-pixel-ratio: 3) {
+  /* iPhone 15 Plus specific styles */
+  .MuiButton-root {
+    min-height: 50px !important;
+    font-size: 1.1rem !important;
+  }
+  
+  .MuiTextField-root .MuiInputBase-root {
+    min-height: 50px !important;
+    font-size: 1rem !important;
+  }
+  
+  .MuiTypography-h4 {
+    font-size: 1.5rem !important;
+  }
+  
+  .MuiTypography-h5 {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Fix for iOS Safari bottom bar overlay */
+@supports (padding: max(0px)) {
+  .ios-safe-area-bottom {
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* Prevent horizontal scrolling on mobile */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Ensure proper touch targets */
+@media (hover: none) and (pointer: coarse) {
+  .MuiIconButton-root {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .MuiButton-root {
+    min-height: 48px;
+    padding: 12px 24px;
+  }
+}
+
+/* Fix for sticky elements on iOS */
+@media screen and (max-width: 767px) {
+  .MuiAppBar-root {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+  }
+}
+
+/* Optimize font rendering on mobile devices */
+@media screen and (max-width: 767px) {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Large phone specific improvements */
+@media screen and (min-width: 480px) and (max-width: 767px) {
+  .MuiContainer-root {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  
+  .MuiCard-root {
+    margin: 16px 0 !important;
+    border-radius: 16px !important;
+  }
+  
+  .MuiButton-root {
+    border-radius: 12px !important;
+    font-weight: 500 !important;
+  }
+}

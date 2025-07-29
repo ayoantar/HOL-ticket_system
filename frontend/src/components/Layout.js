@@ -41,7 +41,7 @@ const Layout = () => {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
   const { t } = useTranslation();
-  const { isMobile } = useResponsive();
+  const { isMobile, isLargePhone, isIPhoneStyle } = useResponsive();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -103,8 +103,8 @@ const Layout = () => {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          width: { md: `calc(100% - ${drawerWidth}px)` }, // Only offset on tablets and up
+          ml: { md: `${drawerWidth}px` },
         }}
       >
         <Toolbar>
@@ -112,7 +112,13 @@ const Layout = () => {
             color="inherit"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ 
+              mr: 2, 
+              display: { md: 'none' }, // Show on mobile and large phones, hide on tablets+
+              '& .MuiSvgIcon-root': {
+                fontSize: isLargePhone ? '1.75rem' : '1.5rem'
+              }
+            }}
           >
             <MenuIcon />
           </IconButton>
@@ -121,7 +127,7 @@ const Layout = () => {
           </Typography>
           
           {/* Language Switcher */}
-          <LanguageSwitcher color="inherit" size={isMobile ? 'small' : 'medium'} />
+          <LanguageSwitcher color="inherit" size={isIPhoneStyle() ? 'medium' : 'large'} />
           
           <IconButton color="inherit" onClick={() => setNotificationOpen(true)}>
             <Badge badgeContent={0} color="error">
@@ -161,7 +167,7 @@ const Layout = () => {
       
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
       >
         <Drawer
           variant="temporary"
@@ -169,8 +175,15 @@ const Layout = () => {
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            display: { xs: 'block', md: 'none' }, // Show on phones and large phones
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: drawerWidth,
+              // Better touch targets on mobile
+              '& .MuiListItem-root': {
+                minHeight: isIPhoneStyle() ? '56px' : '48px',
+              }
+            },
           }}
         >
           {drawer}
@@ -178,7 +191,7 @@ const Layout = () => {
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: 'none', sm: 'block' },
+            display: { xs: 'none', md: 'block' }, // Show only on tablets and up
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
           open
@@ -192,8 +205,8 @@ const Layout = () => {
         sx={{
           flexGrow: 1,
           p: { xs: 1, sm: 2, md: 3 }, // Responsive padding
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: { xs: 7, sm: 8 }, // Smaller top margin on mobile
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          mt: { xs: 7, sm: 8, md: 8 }, // Consistent top margin
           minHeight: 'calc(100vh - 64px)', // Ensure full height
           display: 'flex',
           flexDirection: 'column'

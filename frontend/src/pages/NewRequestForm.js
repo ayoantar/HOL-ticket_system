@@ -30,7 +30,7 @@ import GraphicRequestForm from '../components/forms/GraphicRequestForm';
 const NewRequestForm = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { isMobile, getContainerMaxWidth } = useResponsive();
+  const { isMobile, isLargePhone, isIPhoneStyle, getContainerMaxWidth } = useResponsive();
   const [activeStep, setActiveStep] = useState(0);
   const [requestType, setRequestType] = useState('');
   const [userInfo, setUserInfo] = useState({
@@ -502,7 +502,15 @@ const NewRequestForm = () => {
   return (
     <Container maxWidth={getContainerMaxWidth()}>
       <Paper sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-        <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+        <Typography 
+          variant={isIPhoneStyle() ? "h5" : "h4"} 
+          gutterBottom
+          sx={{ 
+            fontSize: isLargePhone ? '1.5rem' : undefined,
+            textAlign: 'center',
+            mb: { xs: 2, sm: 3 }
+          }}
+        >
           {t('requests.newRequest')}
         </Typography>
         
@@ -515,8 +523,8 @@ const NewRequestForm = () => {
         <Stepper 
           activeStep={activeStep} 
           sx={{ mb: { xs: 2, sm: 3, md: 4 } }}
-          orientation={isMobile ? "vertical" : "horizontal"}
-          alternativeLabel={!isMobile}
+          orientation={isIPhoneStyle() ? "vertical" : "horizontal"}
+          alternativeLabel={!isIPhoneStyle()}
           nonLinear={false}
         >
           {steps.map((label) => (
@@ -524,11 +532,11 @@ const NewRequestForm = () => {
               <StepLabel 
                 sx={{
                   '& .MuiStepLabel-labelContainer': {
-                    fontSize: isMobile ? '0.875rem' : '1rem'
+                    fontSize: isIPhoneStyle() ? '1rem' : '1.125rem'
                   }
                 }}
               >
-                {isMobile ? label.split(' ').slice(0, 2).join(' ') : label}
+                {isIPhoneStyle() ? label.split(' ').slice(0, 2).join(' ') : label}
               </StepLabel>
             </Step>
           ))}
@@ -540,14 +548,14 @@ const NewRequestForm = () => {
           display: 'flex', 
           justifyContent: 'space-between', 
           mt: { xs: 3, sm: 4 },
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? 2 : 0
+          flexDirection: isIPhoneStyle() ? 'column' : 'row',
+          gap: isIPhoneStyle() ? 2 : 0
         }}>
           <Button
             onClick={handleBack}
             disabled={activeStep === 0}
-            size={isMobile ? 'large' : 'medium'}
-            fullWidth={isMobile}
+            size={isIPhoneStyle() ? 'large' : 'medium'}
+            fullWidth={isIPhoneStyle()}
           >
             {t('common.back')}
           </Button>
@@ -557,8 +565,8 @@ const NewRequestForm = () => {
               variant="contained"
               onClick={handleSubmit}
               disabled={createRequestMutation.isLoading}
-              size={isMobile ? 'large' : 'medium'}
-              fullWidth={isMobile}
+              size={isIPhoneStyle() ? 'large' : 'medium'}
+              fullWidth={isIPhoneStyle()}
             >
               {createRequestMutation.isLoading ? t('requests.submitting') : t('requests.submitRequest')}
             </Button>
@@ -566,8 +574,8 @@ const NewRequestForm = () => {
             <Button
               variant="contained"
               onClick={handleNext}
-              size={isMobile ? 'large' : 'medium'}
-              fullWidth={isMobile}
+              size={isIPhoneStyle() ? 'large' : 'medium'}
+              fullWidth={isIPhoneStyle()}
             >
               {t('common.next')}
             </Button>

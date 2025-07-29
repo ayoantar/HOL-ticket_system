@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import 'react-toastify/dist/ReactToastify.css';
+import './styles/mobile-fixes.css'; // Mobile-specific CSS fixes
 import './i18n'; // Initialize i18n
 
 import Login from './pages/Login';
@@ -30,49 +31,74 @@ const theme = createTheme({
   },
   breakpoints: {
     values: {
-      xs: 0,
-      sm: 600,
-      md: 900,
-      lg: 1200,
-      xl: 1536,
+      xs: 0,      // 0-479px - Small phones (iPhone SE, older phones)
+      sm: 480,    // 480-767px - Large phones (iPhone 15 Plus, large Android phones)
+      md: 768,    // 768-1023px - Tablets
+      lg: 1024,   // 1024-1439px - Small desktops/laptops
+      xl: 1440,   // 1440px+ - Large desktops
     },
   },
   typography: {
-    // Mobile-optimized typography
+    // Mobile-optimized typography for better readability on large phones
     h1: {
-      fontSize: '2rem',
-      '@media (min-width:600px)': {
+      fontSize: '1.75rem',
+      '@media (min-width:480px)': {
+        fontSize: '2rem',
+      },
+      '@media (min-width:768px)': {
         fontSize: '2.5rem',
       },
     },
     h2: {
-      fontSize: '1.75rem',
-      '@media (min-width:600px)': {
+      fontSize: '1.5rem',
+      '@media (min-width:480px)': {
+        fontSize: '1.75rem',
+      },
+      '@media (min-width:768px)': {
         fontSize: '2rem',
       },
     },
     h3: {
-      fontSize: '1.5rem',
-      '@media (min-width:600px)': {
+      fontSize: '1.25rem',
+      '@media (min-width:480px)': {
+        fontSize: '1.5rem',
+      },
+      '@media (min-width:768px)': {
         fontSize: '1.75rem',
       },
     },
     h4: {
-      fontSize: '1.25rem',
-      '@media (min-width:600px)': {
+      fontSize: '1.125rem',
+      '@media (min-width:480px)': {
+        fontSize: '1.25rem',
+      },
+      '@media (min-width:768px)': {
         fontSize: '1.5rem',
+      },
+    },
+    h5: {
+      fontSize: '1rem',
+      '@media (min-width:480px)': {
+        fontSize: '1.125rem',
+      },
+      '@media (min-width:768px)': {
+        fontSize: '1.25rem',
       },
     },
     body1: {
       fontSize: '0.875rem',
-      '@media (min-width:600px)': {
+      lineHeight: 1.5,
+      '@media (min-width:480px)': {
         fontSize: '1rem',
+        lineHeight: 1.6,
       },
     },
     body2: {
-      fontSize: '0.75rem',
-      '@media (min-width:600px)': {
+      fontSize: '0.8125rem',
+      lineHeight: 1.4,
+      '@media (min-width:480px)': {
         fontSize: '0.875rem',
+        lineHeight: 1.5,
       },
     },
   },
@@ -81,10 +107,17 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          minHeight: '44px', // Touch-friendly minimum size
-          '@media (max-width:599px)': {
+          minHeight: '48px', // Larger touch target for iPhone 15 Plus
+          fontSize: '1rem',
+          '@media (max-width:479px)': {
             fontSize: '0.875rem',
-            padding: '8px 16px',
+            padding: '12px 20px',
+            minHeight: '44px',
+          },
+          '@media (min-width:480px) and (max-width:767px)': {
+            fontSize: '1rem',
+            padding: '14px 24px',
+            minHeight: '48px',
           },
         },
       },
@@ -93,7 +126,20 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiInputBase-root': {
-            minHeight: '44px', // Touch-friendly input height
+            minHeight: '48px', // Larger for better touch on iPhone 15 Plus
+            fontSize: '1rem',
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '1rem',
+          },
+          '@media (max-width:479px)': {
+            '& .MuiInputBase-root': {
+              minHeight: '44px',
+              fontSize: '0.875rem',
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '0.875rem',
+            },
           },
         },
       },
@@ -101,7 +147,11 @@ const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          '@media (max-width:599px)': {
+          '@media (max-width:767px)': {
+            padding: '12px 8px',
+            fontSize: '0.875rem',
+          },
+          '@media (max-width:479px)': {
             padding: '8px',
             fontSize: '0.75rem',
           },
@@ -111,8 +161,13 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          '@media (max-width:599px)': {
+          '@media (max-width:767px)': {
+            margin: '12px 0',
+            borderRadius: '12px',
+          },
+          '@media (max-width:479px)': {
             margin: '8px 0',
+            borderRadius: '8px',
           },
         },
       },
@@ -120,9 +175,26 @@ const theme = createTheme({
     MuiContainer: {
       styleOverrides: {
         root: {
-          '@media (max-width:599px)': {
-            paddingLeft: '8px',
-            paddingRight: '8px',
+          '@media (max-width:479px)': {
+            paddingLeft: '12px',
+            paddingRight: '12px',
+          },
+          '@media (min-width:480px) and (max-width:767px)': {
+            paddingLeft: '16px',
+            paddingRight: '16px',
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          '@media (max-width:767px)': {
+            '& .MuiToolbar-root': {
+              minHeight: '56px',
+              paddingLeft: '12px',
+              paddingRight: '12px',
+            },
           },
         },
       },

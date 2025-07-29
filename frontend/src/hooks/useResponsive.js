@@ -3,10 +3,11 @@ import { useTheme, useMediaQuery } from '@mui/material';
 export const useResponsive = () => {
   const theme = useTheme();
   
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // 0-479px
+  const isLargePhone = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 480-767px  
+  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 768-1023px
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg')); // 1024px+
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl')); // 1440px+
   
   // Specific breakpoints
   const isXs = useMediaQuery(theme.breakpoints.only('xs'));
@@ -24,36 +25,45 @@ export const useResponsive = () => {
     return xs;
   };
   
-  const getSpacing = (mobile = 2, tablet = 3, desktop = 4) => {
+  const getSpacing = (mobile = 2, largePhone = 3, tablet = 4, desktop = 5) => {
     if (isMobile) return mobile;
+    if (isLargePhone) return largePhone;
     if (isTablet) return tablet;
     return desktop;
   };
   
-  const getFontSize = (mobile = '0.875rem', tablet = '1rem', desktop = '1.125rem') => {
+  const getFontSize = (mobile = '0.875rem', largePhone = '1rem', tablet = '1.125rem', desktop = '1.25rem') => {
     if (isMobile) return mobile;
+    if (isLargePhone) return largePhone;
     if (isTablet) return tablet;
     return desktop;
   };
   
   const getTableSize = () => {
-    return isMobile ? 'small' : 'medium';
+    return (isMobile || isLargePhone) ? 'small' : 'medium';
   };
   
   const shouldShowDrawer = () => {
-    return !isMobile;
+    return isTablet || isDesktop;
   };
   
   const getContainerMaxWidth = () => {
     if (isMobile) return 'xs';
-    if (isTablet) return 'sm';
-    if (isDesktop) return 'md';
-    return 'lg';
+    if (isLargePhone) return 'sm';
+    if (isTablet) return 'md';
+    if (isDesktop) return 'lg';
+    return 'xl';
+  };
+  
+  // iPhone 15 Plus specific optimizations
+  const isIPhoneStyle = () => {
+    return isMobile || isLargePhone;
   };
   
   return {
     // Boolean flags
     isMobile,
+    isLargePhone,
     isTablet,
     isDesktop,
     isLargeScreen,
@@ -70,6 +80,7 @@ export const useResponsive = () => {
     getTableSize,
     shouldShowDrawer,
     getContainerMaxWidth,
+    isIPhoneStyle,
     
     // Theme breakpoints for direct use
     theme
