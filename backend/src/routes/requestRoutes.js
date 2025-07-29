@@ -22,8 +22,8 @@ const fileLimiter = createFileLimiter();
 
 // Create new request (any authenticated user)
 router.post('/', 
-  requestLimiter,
-  fileLimiter,
+  // requestLimiter, // Temporarily disabled for ngrok testing
+  // fileLimiter,    // Temporarily disabled for ngrok testing
   upload.fields([
     { name: 'graphicFile', maxCount: 1 },
     { name: 'registrationFiles', maxCount: 5 }

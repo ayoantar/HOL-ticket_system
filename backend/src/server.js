@@ -23,6 +23,9 @@ const requestRoutes = require('./routes/requestRoutes');
 
 const app = express();
 
+// Trust proxy for ngrok and production deployment
+app.set('trust proxy', 1);
+
 connectDB();
 
 // Enhanced security middleware
@@ -60,6 +63,12 @@ app.use(cors({
     
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
+    
+    // Allow all ngrok.app and ngrok-free.app domains for development
+    if (origin && (origin.includes('.ngrok.app') || origin.includes('.ngrok-free.app'))) {
+      console.log(`CORS allowing ngrok origin: ${origin}`);
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -99,13 +108,11 @@ app.use('/api/requests', requestRoutes);
 
 app.use('/uploads', express.static('uploads'));
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Something went wrong!'
-  });
-});
+// Import error middleware
+const { errorIdMiddleware } = require('./utils/errorUtils');
+
+// Use error ID middleware for all unhandled errors
+app.use(errorIdMiddleware);
 
 const PORT = process.env.PORT || 5002;
 

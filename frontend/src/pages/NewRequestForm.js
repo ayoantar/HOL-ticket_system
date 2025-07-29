@@ -58,6 +58,12 @@ const NewRequestForm = () => {
           } else if (key.includes('File') && data[key] instanceof File) {
             formDataToSend.append(key, data[key]);
           } else if (data[key] instanceof Date) {
+            // Check if date is valid before converting to ISO string
+            if (isNaN(data[key].getTime())) {
+              console.error(`Invalid date for field ${key}:`, data[key]);
+              // Skip invalid dates - don't send them to backend
+              return;
+            }
             formDataToSend.append(key, data[key].toISOString());
           } else {
             formDataToSend.append(key, data[key]);
@@ -92,18 +98,32 @@ const NewRequestForm = () => {
         console.error('Error response:', error.response?.data);
         
         let errorMessage = 'Failed to submit request';
+        let errorId = null;
         
-        if (error.response?.data?.errors) {
-          // Validation errors
-          console.log('Validation errors:', error.response.data.errors);
+        if (error.response?.data?.errorId) {
+          errorId = error.response.data.errorId;
+        }
+        
+        if (error.response?.data?.validationErrors) {
+          // New validation errors format with error ID
+          console.log('Validation errors:', error.response.data.validationErrors);
+          errorMessage = error.response.data.validationErrors.map(err => `${err.param}: ${err.msg}`).join(', ');
+        } else if (error.response?.data?.errors) {
+          // Legacy validation errors format
+          console.log('Legacy validation errors:', error.response.data.errors);
           errorMessage = error.response.data.errors.map(err => `${err.param}: ${err.msg}`).join(', ');
         } else if (error.response?.data?.message) {
           errorMessage = error.response.data.message;
         }
         
+        // Include error ID in the message if available
+        const fullErrorMessage = errorId 
+          ? `${errorMessage}\n\nError ID: ${errorId} (Please provide this ID when contacting support)`
+          : errorMessage;
+        
         setAlert({ 
           type: 'error', 
-          message: errorMessage
+          message: fullErrorMessage
         });
       }
     }
@@ -129,6 +149,24 @@ const NewRequestForm = () => {
   };
 
   const handleSubmit = () => {
+    // Validate dates for event requests
+    if (requestType === 'event') {
+      if (!formData.startingDate || !formData.endingDate) {
+        setAlert({ type: 'error', message: 'Please select both starting and ending dates for the event' });
+        return;
+      }
+      
+      if (formData.startingDate instanceof Date && isNaN(formData.startingDate.getTime())) {
+        setAlert({ type: 'error', message: 'Please select a valid starting date' });
+        return;
+      }
+      
+      if (formData.endingDate instanceof Date && isNaN(formData.endingDate.getTime())) {
+        setAlert({ type: 'error', message: 'Please select a valid ending date' });
+        return;
+      }
+    }
+    
     const requestData = {
       requestType,
       ...userInfo,

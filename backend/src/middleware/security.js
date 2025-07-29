@@ -5,7 +5,7 @@ const path = require('path');
 // Enhanced rate limiting for different endpoints
 exports.createAuthLimiter = () => rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs for auth
+  max: 50, // increased limit for development/testing - limit each IP to 50 requests per windowMs for auth
   message: {
     success: false,
     message: 'Too many authentication attempts, please try again later'
@@ -16,7 +16,7 @@ exports.createAuthLimiter = () => rateLimit({
 
 exports.createRequestLimiter = () => rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 10, // limit each IP to 10 requests per windowMs for creating requests
+  max: 100, // increased limit for development/testing - limit each IP to 100 requests per windowMs for creating requests
   message: {
     success: false,
     message: 'Too many requests created, please try again later'
@@ -27,7 +27,7 @@ exports.createRequestLimiter = () => rateLimit({
 
 exports.createFileLimiter = () => rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20, // limit each IP to 20 file uploads per hour
+  max: 200, // increased limit for development/testing - limit each IP to 200 file uploads per hour
   message: {
     success: false,
     message: 'Too many file uploads, please try again later'
@@ -179,7 +179,7 @@ exports.validateRequest = [
     .optional()
     .matches(/^[\+]?[1-9][\d]{0,15}$/)
     .withMessage('Please provide a valid phone number'),
-  body('request_type')
+  body('requestType')
     .isIn(['event', 'web', 'technical', 'graphic'])
     .withMessage('Invalid request type'),
 ];

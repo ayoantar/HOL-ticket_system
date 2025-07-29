@@ -1,6 +1,8 @@
 const { Request, EventRequest, WebRequest, TechnicalRequest, GraphicRequest, RequestActivity, User, Notification } = require('../models/index');
 const { validationResult } = require('express-validator');
 const { sequelize } = require('../config/database');
+const { createErrorResponse } = require('../utils/errorUtils');
+const { sendRequestNotification } = require('../services/emailService');
 const path = require('path');
 const fs = require('fs');
 
@@ -12,10 +14,31 @@ exports.createRequest = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       await transaction.rollback();
-      return res.status(400).json({ errors: errors.array() });
+      const errorResponse = createErrorResponse(
+        'Request validation failed. Please check your input and try again.',
+        null,
+        {
+          validationErrors: errors.array(),
+          requestType: req.body.requestType,
+          userId: req.user?.id
+        }
+      );
+      return res.status(400).json(errorResponse);
     }
     
     const { requestType, name, email, phone, urgency = 'normal', dueDate, ...formData } = req.body;
+    
+    // Debug logging to help with error ID ERR-20250728-220153-FA93
+    console.log('🔍 Request submission debug info:', {
+      requestType,
+      name,
+      email,
+      phone,
+      urgency,
+      dueDate,
+      formDataKeys: Object.keys(formData),
+      formData: formData
+    });
     
     // Parse JSON fields if they exist
     if (formData.equipmentNeeded && typeof formData.equipmentNeeded === 'string') {
@@ -73,12 +96,37 @@ exports.createRequest = async (req, res) => {
     let specificRequest;
     switch (requestType) {
       case 'event':
+        // Validate required fields
+        if (!formData.eventName || !formData.ministryInCharge || !formData.startingDate || !formData.endingDate) {
+          throw new Error('Missing required event fields: eventName, ministryInCharge, startingDate, or endingDate');
+        }
+        
+        // Validate and parse dates
+        let startDate, endDate;
+        
+        if (!formData.startingDate || formData.startingDate === 'Invalid date') {
+          throw new Error('Starting date is required for event requests');
+        }
+        if (!formData.endingDate || formData.endingDate === 'Invalid date') {
+          throw new Error('Ending date is required for event requests');
+        }
+        
+        startDate = new Date(formData.startingDate);
+        endDate = new Date(formData.endingDate);
+        
+        if (isNaN(startDate.getTime())) {
+          throw new Error(`Invalid starting date format: ${formData.startingDate}`);
+        }
+        if (isNaN(endDate.getTime())) {
+          throw new Error(`Invalid ending date format: ${formData.endingDate}`);
+        }
+        
         specificRequest = await EventRequest.create({
           requestId: request.id,
           eventName: formData.eventName,
           ministryInCharge: formData.ministryInCharge,
-          startingDate: new Date(formData.startingDate),
-          endingDate: new Date(formData.endingDate),
+          startingDate: startDate,
+          endingDate: endDate,
           graphicRequired: formData.graphicRequired || false,
           graphicConcept: formData.graphicConcept || null,
           graphicFilePath: req.files?.graphicFile ? req.files.graphicFile[0].path : null,
@@ -92,6 +140,11 @@ exports.createRequest = async (req, res) => {
         break;
         
       case 'web':
+        // Validate required fields
+        if (!formData.domain || !formData.description) {
+          throw new Error('Missing required web request fields: domain or description');
+        }
+        
         specificRequest = await WebRequest.create({
           requestId: request.id,
           domain: formData.domain,
@@ -134,15 +187,31 @@ exports.createRequest = async (req, res) => {
         });
     }
     
-    // TODO: Create notification for client after database is updated
-    // await Notification.create({
-    //   recipientId: req.user.id,
-    //   type: 'status_change',
-    //   title: 'Request Submitted',
-    //   message: `Your ${requestType} request ${request.requestNumber} has been submitted successfully.`
-    // }, { transaction });
+    // Create notification for client
+    await Notification.create({
+      recipientId: req.user.id,
+      type: 'status_change',
+      title: 'Request Submitted',
+      message: `Your ${requestType} request ${request.requestNumber} has been submitted successfully.`
+    }, { transaction });
     
     await transaction.commit();
+    
+    // Send email notification to the email address provided in the form
+    try {
+      // Create a user object with the form email for notification
+      const notificationRecipient = {
+        name: name,
+        email: email, // Use the email from the form, not the logged-in user's email
+        id: req.user.id
+      };
+      
+      await sendRequestNotification(notificationRecipient, request, 'created');
+      console.log(`📧 Email notification sent to ${email} for request ${request.requestNumber}`);
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the request creation if email fails
+    }
     
     res.status(201).json({
       success: true,
@@ -153,10 +222,16 @@ exports.createRequest = async (req, res) => {
     });
   } catch (error) {
     await transaction.rollback();
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    const errorResponse = createErrorResponse(
+      'Failed to create request. Please try again.',
+      error,
+      {
+        requestType: req.body.requestType,
+        userId: req.user?.id,
+        userEmail: req.user?.email
+      }
+    );
+    res.status(500).json(errorResponse);
   }
 };
 

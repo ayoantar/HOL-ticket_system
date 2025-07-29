@@ -89,14 +89,8 @@ const Request = sequelize.define('Request', {
   tableName: 'requests',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  hooks: {
-    afterCreate: async (request, options) => {
-      // Generate request number after the record is created and ID is available
-      const requestNumber = `REQ-${String(request.id).padStart(6, '0')}`;
-      await request.update({ requestNumber }, { transaction: options.transaction });
-    }
-  }
+  updatedAt: 'updated_at'
+  // Removed hooks - using database trigger for department-based request numbering
 });
 
 module.exports = Request;
