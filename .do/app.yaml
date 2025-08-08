@@ -3,7 +3,7 @@ services:
   - name: backend
     source_dir: /backend
     github:
-      repo: your-username/your-repo-name
+      repo: ayoantar/HOL-ticket_system
       branch: main
       deploy_on_push: true
     run_command: npm start
@@ -41,7 +41,7 @@ services:
   - name: frontend
     source_dir: /frontend
     github:
-      repo: your-username/your-repo-name
+      repo: ayoantar/HOL-ticket_system
       branch: main
       deploy_on_push: true
     build_command: npm run build
