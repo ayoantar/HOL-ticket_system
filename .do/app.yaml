@@ -1,7 +1,8 @@
 name: houses-of-light-request-system
+
 services:
   - name: backend
-    source_dir: /backend
+    source_dir: backend
     github:
       repo: ayoantar/HOL-ticket_system
       branch: main
@@ -39,7 +40,7 @@ services:
         type: SECRET
 
   - name: frontend
-    source_dir: /frontend
+    source_dir: frontend
     github:
       repo: ayoantar/HOL-ticket_system
       branch: main
@@ -51,11 +52,6 @@ services:
     http_port: 80
     routes:
       - path: /
-    static_sites:
-      - name: frontend-static
-        source_dir: build
-        index_document: index.html
-        error_document: index.html
 
 databases:
   - name: postgres-db
