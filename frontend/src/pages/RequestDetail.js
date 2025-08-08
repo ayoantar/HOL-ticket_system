@@ -51,6 +51,7 @@ import {
 import { format, formatDistanceToNow, isAfter, subMinutes } from 'date-fns';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useResponsive } from '../hooks/useResponsive';
 import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../config/api';
 
@@ -128,6 +129,7 @@ const RequestDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isMobile, isLargePhone, isIPhoneStyle, getContainerMaxWidth } = useResponsive();
   const queryClient = useQueryClient();
   
   // State for inline editing
@@ -550,7 +552,7 @@ const RequestDetail = () => {
 
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth={getContainerMaxWidth()} sx={{ py: { xs: 2, sm: 3, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
         <Skeleton variant="rectangular" height={200} />
       </Container>
     );
@@ -558,7 +560,7 @@ const RequestDetail = () => {
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth={getContainerMaxWidth()} sx={{ py: { xs: 2, sm: 3, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
         <Alert severity="error">
           Error loading request details: {error.message}
         </Alert>
@@ -568,7 +570,7 @@ const RequestDetail = () => {
 
   if (!request) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth={getContainerMaxWidth()} sx={{ py: { xs: 2, sm: 3, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
         <Alert severity="error">
           Request not found
         </Alert>
@@ -577,7 +579,7 @@ const RequestDetail = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth={getContainerMaxWidth()} sx={{ py: { xs: 2, sm: 3, md: 4 }, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header */}
       <Box mb={4}>
         <Button
