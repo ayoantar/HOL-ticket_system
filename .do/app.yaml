@@ -1,5 +1,5 @@
 name: houses-of-light-request-system
-# Fixed deployment configuration
+# DEPLOYMENT TEST - COMMIT 2c4107a - TIMESTAMP 2025-08-09T02:20
 services:
   - name: backend
     source_dir: backend
