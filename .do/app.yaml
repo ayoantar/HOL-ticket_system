@@ -1,5 +1,5 @@
 name: houses-of-light-request-system
-
+# Fixed deployment configuration
 services:
   - name: backend
     source_dir: backend
