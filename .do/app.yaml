@@ -46,7 +46,7 @@ services:
       repo: ayoantar/HOL-ticket_system
       branch: main
       deploy_on_push: true
-    build_command: CI=false npm install --legacy-peer-deps && npm run build
+    build_command: CI=false npm run build
     environment_slug: node-js
     instance_count: 1
     instance_size_slug: basic-xxs
