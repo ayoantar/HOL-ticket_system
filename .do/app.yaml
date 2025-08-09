@@ -7,6 +7,7 @@ services:
       repo: ayoantar/HOL-ticket_system
       branch: main
       deploy_on_push: true
+    build_command: npm ci
     run_command: npm start
     environment_slug: node-js
     instance_count: 1
@@ -45,13 +46,18 @@ services:
       repo: ayoantar/HOL-ticket_system
       branch: main
       deploy_on_push: true
-    build_command: npm run build
+    build_command: CI=false npm install --legacy-peer-deps && npm run build
     environment_slug: node-js
     instance_count: 1
     instance_size_slug: basic-xxs
     http_port: 80
     routes:
       - path: /
+    static_sites:
+      - name: frontend-static
+        source_dir: build
+        index_document: index.html
+        error_document: index.html
 
 databases:
   - name: postgres-db
